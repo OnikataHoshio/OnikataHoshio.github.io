@@ -19,16 +19,16 @@
   <meta name="author" content="OnikataHoshio">
   <meta name="keywords" content="">
   
-    <meta name="description" content="论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003 参考资料：Study Notes On The Marschner Hair Shading Model | Blog ### 基本概念 一个 Fiber（纤维，毛发）的由三个层次组成： 1. cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； 2. cortex">
+    <meta name="description" content="论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003 参考资料：Study Notes On The Marschner Hair Shading Model | Blog 基本概念 一个 Fiber（纤维，毛发）的由三个层次组成：  cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； cortex：皮质层，毛发内部">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Marschner毛发模型">
 <meta property="og:url" content="https://onikatahoshio.github.io/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/index.html">
 <meta property="og:site_name" content="星生的小窝">
-<meta property="og:description" content="论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003 参考资料：Study Notes On The Marschner Hair Shading Model | Blog ### 基本概念 一个 Fiber（纤维，毛发）的由三个层次组成： 1. cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； 2. cortex">
+<meta property="og:description" content="论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003 参考资料：Study Notes On The Marschner Hair Shading Model | Blog 基本概念 一个 Fiber（纤维，毛发）的由三个层次组成：  cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； cortex：皮质层，毛发内部">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/Marschner.png">
 <meta property="article:published_time" content="2025-11-04T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-01-31T14:07:46.588Z">
+<meta property="article:modified_time" content="2026-01-31T14:20:31.696Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="毛发渲染">
 <meta property="article:tag" content="计算机图形学">
@@ -228,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.5k 字
+          4.4k 字
         
       </span>
     
@@ -239,7 +239,7 @@
         
         
         
-          38 分钟
+          37 分钟
         
       </span>
     
@@ -293,90 +293,108 @@
                 <p><strong><em>论文：Light Scattering from Human Hair Fibers, SIGGRAPH
 2003</em></strong> 参考资料：<a
 target="_blank" rel="noopener" href="https://gaukler.github.io/2023/10/21/study-notes-on-the-marschner-hair-shading-model.html">Study
-Notes On The Marschner Hair Shading Model | Blog</a> ### 基本概念 一个
-Fiber（纤维，毛发）的由三个层次组成： 1.
-cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； 2.
-cortex：皮质层，毛发内部的主要部分； 3.
-medulla：髓质层，毛发中心部分。</p>
+Notes On The Marschner Hair Shading Model | Blog</a></p>
+<h3 id="基本概念">基本概念</h3>
+<p>一个 Fiber（纤维，毛发）的由三个层次组成：</p>
+<ol type="1">
+<li>cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起；</li>
+<li>cortex：皮质层，毛发内部的主要部分；</li>
+<li>medulla：髓质层，毛发中心部分。</li>
+</ol>
 <p>Marschner模型只考虑了cuticle和cortex两部分，并用折射率<span
 class="math inline"><em>η</em></span>和吸收系数（an absorption cross
 section）<span
-class="math inline"><em>σ</em><sub><em>a</em></sub></span>描述毛发内部的属性。
-### 模型概览 Marschner模型的示意图如下：</p>
+class="math inline"><em>σ</em><sub><em>a</em></sub></span>描述毛发内部的属性。</p>
+<h3 id="模型概览">模型概览</h3>
+<p>Marschner模型的示意图如下：</p>
 <img src="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/IMG-20260110151649582.png" srcset="/img/loading.gif" lazyload class="">
 <p><strong>Marschner 模型的着色由三种主要成分构成：R、TT 与
-TRT：</strong> 1.
-<strong>R（Reflection）</strong>：光线入射到毛发表面后直接发生镜面反射，形成表面反射分量。
-2.
-<strong>TT（Transmission-Transmission）</strong>：光线入射时先折射进入毛发内部，再在另一侧折射出纤维，从而形成透射分量。
-3.
-<strong>TRT（Transmission-Reflection-Transmission）</strong>：光线入射时折射进入毛发内部，在纤维另一侧发生一次反射，随后再折射回原侧射出，形成内部反射分量。</p>
+TRT：</strong></p>
+<ol type="1">
+<li><strong>R（Reflection）</strong>：光线入射到毛发表面后直接发生镜面反射，形成表面反射分量。</li>
+<li><strong>TT（Transmission-Transmission）</strong>：光线入射时先折射进入毛发内部，再在另一侧折射出纤维，从而形成透射分量。</li>
+<li><strong>TRT（Transmission-Reflection-Transmission）</strong>：光线入射时折射进入毛发内部，在纤维另一侧发生一次反射，随后再折射回原侧射出，形成内部反射分量。</li>
+</ol>
 <p><strong>假设入射光是白色：</strong> <strong>R
 分量</strong>代表光线在毛发表面发生的直接镜面反射，会在表面形成一块白色高光；而
 <strong>TRT
 分量</strong>则源于光线折射进入毛发内部后，在另一侧发生一次反射，再折射回原侧射出。由于光线在这一过程中会被毛发内部的
 <strong>cortex</strong> 和 <strong>medulla</strong>
-部分吸收，因此最终呈现为一块带有色彩的高光。 ### 符号说明
-为了描述光照打到毛发后的行为，Marschner模型定义了以下符号：
+部分吸收，因此最终呈现为一块带有色彩的高光。</p>
+<h3 id="符号说明">符号说明</h3>
+<p>为了描述光照打到毛发后的行为，Marschner模型定义了以下符号：
 <img src="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/IMG-20260110151649611.png" srcset="/img/loading.gif" lazyload class=""></p>
-<p>下面将依次解释这些符号： 1. <span
-class="math inline"><strong>u</strong></span>：毛发的切线（轴线）方向，由发根（root）指向发梢（tip）；
-2. <span
+<p>下面将依次解释这些符号：</p>
+<ol type="1">
+<li><span
+class="math inline"><strong>u</strong></span>：毛发的切线（轴线）方向，由发根（root）指向发梢（tip）；</li>
+<li><span
 class="math inline"><strong>v</strong>, <strong>w</strong></span>：毛发的法线方向，两者正交，张成的平面称为法平面<span
 class="math inline"><em>v</em> − <em>w</em></span>，且<span
 class="math inline"><em>v</em></span>为主轴。与<span
-class="math inline"><em>u</em></span>形成正交的坐标系‘ 3. <span
-class="math inline">(<strong>ω</strong><sub><em>i</em></sub></span>：光照方向，也可以理解为入射光方向的反方向，用球面坐标表示；
-4. <span
-class="math inline">(<strong>ω</strong><sub><em>r</em></sub></span>：散射方向（包括反射和折射），也用球面坐标表示；
-5. <span
+class="math inline"><em>u</em></span>形成正交的坐标系‘</li>
+<li><span
+class="math inline">(<strong>ω</strong><sub><em>i</em></sub></span>：光照方向，也可以理解为入射光方向的反方向，用球面坐标表示；</li>
+<li><span
+class="math inline">(<strong>ω</strong><sub><em>r</em></sub></span>：散射方向（包括反射和折射），也用球面坐标表示；</li>
+<li><span
 class="math inline"><em>θ</em><sub><em>i</em></sub>, <em>θ</em><sub><em>r</em></sub></span>：光照方向和散射方向相对于法平面的倾角，<span
 class="math inline">0<sup>∘</sup></span>意味着处于法平面上，<span
 class="math inline">90<sup>∘</sup></span>与<span
 class="math inline"><em>u</em></span>的方向相同，<span
 class="math inline">−90<sup>∘</sup></span>与<span
-class="math inline"><em>u</em></span>的方向相反； 6. <span
+class="math inline"><em>u</em></span>的方向相反；</li>
+<li><span
 class="math inline"><em>ϕ</em><sub><em>i</em></sub>, <em>ϕ</em><sub><em>r</em></sub></span>：光照方向和散射方向的方位角，<span
 class="math inline">0<sup>∘</sup></span>意味着与<span
 class="math inline"><em>v</em></span>同向，<span
 class="math inline">90<sup>∘</sup></span>与<span
-class="math inline"><em>w</em></span>同向。</p>
-<p>除此之外还有一些根据这些定义导出的角度，用于简化后续的符号表示： 1.
-<span
+class="math inline"><em>w</em></span>同向。</li>
+</ol>
+<p>除此之外还有一些根据这些定义导出的角度，用于简化后续的符号表示：</p>
+<ol type="1">
+<li><span
 class="math inline"><em>θ</em><sub><em>d</em></sub></span>：倾角的偏差角<span
-class="math inline">$\frac{\theta_r-\theta_i}{2}$</span>; 2. <span
-class="math inline"><em>ϕ</em></span>：相对方位角<span
-class="math inline"><em>ϕ</em><sub><em>r</em></sub> − <em>ϕ</em><sub><em>i</em></sub></span>；
-3. <span
+class="math inline">$\frac{\theta_r-\theta_i}{2}$</span>;</li>
+<li><span class="math inline"><em>ϕ</em></span>：相对方位角<span
+class="math inline"><em>ϕ</em><sub><em>r</em></sub> − <em>ϕ</em><sub><em>i</em></sub></span>；</li>
+<li><span
 class="math inline"><em>θ</em><sub><em>h</em></sub></span>：平均倾角<span
-class="math inline">$\frac{\theta_r+\theta_i}{2}$</span>; 4. <span
+class="math inline">$\frac{\theta_r+\theta_i}{2}$</span>;</li>
+<li><span
 class="math inline"><em>ϕ</em><sub><em>h</em></sub></span>：平均方位角<span
-class="math inline">$\frac{\phi_r+\phi_i}{2}$</span>; ### 辐射度量学
-<strong>基本辐射度量学</strong></p>
-<p>辐射度量学广泛运用于真实感光照模型中，常用的符号与定义如下： 1. <span
-class="math inline"><em>Q</em></span>：辐射能量（Radiant
+class="math inline">$\frac{\phi_r+\phi_i}{2}$</span>;</li>
+</ol>
+<h3 id="辐射度量学">辐射度量学</h3>
+<p><strong>基本辐射度量学</strong></p>
+<p>辐射度量学广泛运用于真实感光照模型中，常用的符号与定义如下：</p>
+<ol type="1">
+<li><span class="math inline"><em>Q</em></span>：辐射能量（Radiant
 Energy），某个过程辐射出的总能量，记作焦耳<span
-class="math inline"><em>J</em></span>; 2. <span
-class="math inline"><em>Φ</em></span>：辐射通量（Radiant
+class="math inline"><em>J</em></span>;</li>
+<li><span class="math inline"><em>Φ</em></span>：辐射通量（Radiant
 Flux/Power），辐射的总功率，即单位时间内的辐射总量，定义为<span
 class="math inline">$\Phi=\frac{\mathrm{d} Q}{\mathrm{d}
 t}$</span>，单位<span class="math inline"><em>W</em></span>或<span
-class="math inline"><em>J</em>/<em>s</em></span>; 3. <span
-class="math inline"><em>I</em></span>：辐射强度（Radiant
+class="math inline"><em>J</em>/<em>s</em></span>;</li>
+<li><span class="math inline"><em>I</em></span>：辐射强度（Radiant
 Intensity），单位立体角的辐射通量，定义为<span
 class="math inline">$I=\frac{\mathrm d \Phi}{\mathrm d
 \omega}$</span>，单位为<span
-class="math inline"><em>W</em>/<em>s</em><em>r</em></span>； 4. <span
+class="math inline"><em>W</em>/<em>s</em><em>r</em></span>；</li>
+<li><span
 class="math inline"><em>E</em></span>：辐照度（Irradiance），单位<strong>投影</strong>面积<span
 class="math inline">d<em>A</em><sub>⟂</sub></span>的辐射通量，定义为<span
 class="math inline">$E=\frac{\mathrm d \Phi}{\mathrm d A
 }$</span>，单位为<span
-class="math inline"><em>W</em>/<em>m</em><sup>2</sup></span>； 5. <span
+class="math inline"><em>W</em>/<em>m</em><sup>2</sup></span>；</li>
+<li><span
 class="math inline"><em>L</em></span>：辐射亮度（Radiance），单位立体角、单位<strong>投影</strong>面积<span
 class="math inline">d<em>A</em>cos <em>θ</em></span>的辐射通量，定义为<span
 class="math inline">$L=\frac{\mathrm d^2 \Phi}{\mathrm d \omega \mathrm
 d A \cos\theta}$</span>，单位<span
-class="math inline"><em>W</em>/(<em>s</em><em>r</em> ⋅ <em>m</em><sup>2</sup>)</span>。</p>
+class="math inline"><em>W</em>/(<em>s</em><em>r</em> ⋅ <em>m</em><sup>2</sup>)</span>。</li>
+</ol>
 <p>根据定义不难发现，<span class="math inline"><em>Q</em></span>，<span
 class="math inline"><em>Φ</em></span>，<span
 class="math inline"><em>I</em></span>不会随着距离的远近而发生改变。
@@ -429,43 +447,53 @@ class="math display"><em>L̄</em><sub><em>r</em></sub>(<strong>ω</strong><sub><
 <p><strong>实验一：入射平面</strong>
 这里的入射平面指入射光和轴线所形成的二维平面。实验一就是在这个平面上测量不同波长的散射分布。
 <img src="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/IMG-20260110151649633.png" srcset="/img/loading.gif" lazyload class=""></p>
-<p>注意到： 1.
-人工合成的头发高光区域精准地分布在镜面反射方向附近，而真实的头发的高光区域会向着发根（root）偏转<span
-class="math inline">6<sup>∘</sup> − 10<sup>∘</sup></span>。 2.
-在金发的入射平面实验中，注意到不同波长的光线散射的分布不一致，并且在<strong>镜面反射</strong>方向会出现一个次级的亮度峰值（次级高光）。而黑发则没有这样的现象。</p>
+<p>注意到：</p>
+<ol type="1">
+<li>人工合成的头发高光区域精准地分布在镜面反射方向附近，而真实的头发的高光区域会向着发根（root）偏转<span
+class="math inline">6<sup>∘</sup> − 10<sup>∘</sup></span>。</li>
+<li>在金发的入射平面实验中，注意到不同波长的光线散射的分布不一致，并且在<strong>镜面反射</strong>方向会出现一个次级的亮度峰值（次级高光）。而黑发则没有这样的现象。</li>
+</ol>
 <p><strong>实验二：法线平面</strong>
 法线平面实验指入射光处于法线平面的实验，测量对象是这个法线平面上各个方向散射光的亮度。
 <img src="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/IMG-20260110151649660.png" srcset="/img/loading.gif" lazyload class=""></p>
-<p>注意到： 1. 在法平面上存在两个明显的峰值，该论文称之为闪光（glint）。
-2. 测量的结果随着<span
+<p>注意到：</p>
+<ol type="1">
+<li>在法平面上存在两个明显的峰值，该论文称之为闪光（glint）。</li>
+<li>测量的结果随着<span
 class="math inline"><em>ϕ</em><sub><em>i</em></sub></span>的旋转发生改变，但是关于<span
 class="math inline"><em>ϕ</em><sub><em>i</em></sub></span>的<span
-class="math inline">180<sup>∘</sup></span>旋转对称。 3. 出现了焦散。</p>
+class="math inline">180<sup>∘</sup></span>旋转对称。</li>
+<li>出现了焦散。</li>
+</ol>
 <p>#TODO：焦散</p>
 <p><strong>实验三：半球面</strong>
 半球面实验是对前两个实验的扩展，记录了不同角度关系下散射光的亮度，实验结论与前两个实验保持一致。</p>
-<p><strong>实验结论</strong> 1.
-R是主要高光的形成原因，之所以主要高光会向发根偏移，使因为毛发表面角质层的倾斜造成的。
-2. TT会让有颜色的头发在背光面也显得非常亮。 3.
-TRT是有颜色的次级高光的形成的原因，它相较于主要高光会向发梢略微偏移，由于与主要高光很近，有时候表现为主要高光边缘处的彩色光圈。
+<p><strong>实验结论</strong></p>
+<ol type="1">
+<li>R是主要高光的形成原因，之所以主要高光会向发根偏移，使因为毛发表面角质层的倾斜造成的。</li>
+<li>TT会让有颜色的头发在背光面也显得非常亮。</li>
+<li>TRT是有颜色的次级高光的形成的原因，它相较于主要高光会向发梢略微偏移，由于与主要高光很近，有时候表现为主要高光边缘处的彩色光圈。
 次级高光的位置与<span class="math inline"><em>ϕ</em></span>和<span
-class="math inline"><em>θ</em></span>两者相关。当入射光线处于法线平面上时，会产生两个不同的glint，随着入射光线倾角的增加，两个glint会逐渐汇聚在入射平面上，形成一个更亮的glint，最终表现得和入射平面实验一样。</p>
+class="math inline"><em>θ</em></span>两者相关。当入射光线处于法线平面上时，会产生两个不同的glint，随着入射光线倾角的增加，两个glint会逐渐汇聚在入射平面上，形成一个更亮的glint，最终表现得和入射平面实验一样。</li>
+</ol>
 <h3 id="散射光线分布">散射光线分布</h3>
 <p>下面这张图时散射光线方向示意图，其中（a）为反射，（b）为折射。球中垂直于地面的直径是毛发的轴线方向，与其正交的大圆所在面即法平面（平行于地面）。<span
 class="math inline"><em>v</em><sub><em>i</em></sub></span>是入射光线，<span
 class="math inline"><em>v</em><sub><em>r</em></sub></span>是反射光线，<span
 class="math inline"><em>v</em><sub><em>t</em></sub></span>是折射光线。
 <img src="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/IMG-20260110151649682.png" srcset="/img/loading.gif" lazyload class=""></p>
-<p>结论： 1.
-根据反射定律，反射光线与法线的夹角和入射光线与法线的夹角相同，而法平面上的任何一个方向都是毛发的法向，因此<span
+<p>结论：</p>
+<ol type="1">
+<li>根据反射定律，反射光线与法线的夹角和入射光线与法线的夹角相同，而法平面上的任何一个方向都是毛发的法向，因此<span
 class="math inline"><em>v</em><sub><em>r</em></sub></span>是一个集合，分布在一个圆锥上，且<span
 class="math inline"><em>v</em><sub><em>r</em></sub></span>和<span
-class="math inline"><em>v</em><sub><em>i</em></sub></span>的高度相同。
-2. 根据Snell定律，折射光线和入射光线满足<span
+class="math inline"><em>v</em><sub><em>i</em></sub></span>的高度相同。</li>
+<li>根据Snell定律，折射光线和入射光线满足<span
 class="math inline"><em>η</em>sin <em>θ</em><sub><em>t</em></sub> = sin <em>θ</em><sub><em>i</em></sub></span>，同样的，由于法线是一个集合，因此<span
 class="math inline"><em>v</em><sub><em>t</em></sub></span>也是一个集合，分布在一个圆锥上，且<span
 class="math inline"><em>v</em><sub><em>t</em></sub></span>比<span
-class="math inline"><em>v</em><sub><em>i</em></sub></span>更加靠近法平面。</p>
+class="math inline"><em>v</em><sub><em>i</em></sub></span>更加靠近法平面。</li>
+</ol>
 <h3 id="布拉维定律bravaiss-law">布拉维定律（Bravais’s law)</h3>
 <p>在光学和晶体学中，Bravais’s
 law指出：如果将入射光线和透射光线投影到包含表面法线的平面中，它们依然满足折射定律，但是需要一个修正之后的折射率。修正的折射率称为<strong>Bravais
@@ -631,9 +659,13 @@ class="math inline"><em>E</em>(<em>h</em>) = <em>Ē</em>/2</span>是单位�
 class="math inline">d<em>h</em></span>仍然是辐照度。</p>
 <p>这个式子改写成：<span
 class="math display">$$\bar{L}(\phi(h))=\left|2\frac{d\phi}{dh}\right|^{-1}\bar{E}$$</span></p>
-<p>衰减项<span class="math inline"><em>A</em></span>需要考虑两个方面：
-1. 菲涅尔衰减； 2. 光线在毛发内部被吸收了，相关公式<span
-class="math inline"><em>T</em>(<strong>σ</strong><sub><em>a</em></sub>, <em>h</em>) = exp (−2<strong>σ</strong><sub><em>a</em></sub>(1 + cos (2<strong>γ</strong><sub><em>t</em></sub>)))</span>；</p>
+<p>衰减项<span
+class="math inline"><em>A</em></span>需要考虑两个方面：</p>
+<ol type="1">
+<li>菲涅尔衰减；</li>
+<li>光线在毛发内部被吸收了，相关公式<span
+class="math inline"><em>T</em>(<strong>σ</strong><sub><em>a</em></sub>, <em>h</em>) = exp (−2<strong>σ</strong><sub><em>a</em></sub>(1 + cos (2<strong>γ</strong><sub><em>t</em></sub>)))</span>；</li>
+</ol>
 <p>不再做过多解释，最终衰减项可以表示为： <span
 class="math display">$$\begin{aligned}
 &amp; A(0,h)=F(\eta^{\prime},\eta^{\prime\prime},\gamma_i) \\
