@@ -241,7 +241,7 @@
       
       <a class="index-excerpt " href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/" target="_self">
         <div>
-          前言 前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重写对应的虚函数，我们可以实现例如：
+          前言 前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重载对应的虚函数，我们可以实现例如：
         </div>
       </a>
 
