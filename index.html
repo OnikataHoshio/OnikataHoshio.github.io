@@ -243,7 +243,7 @@
       
       <a class="index-excerpt " href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/" target="_self">
         <div>
-          前言前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重写对应的虚函数，我们可以实现例如：
+          前言 前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重写对应的虚函数，我们可以实现例如：
         </div>
       </a>
 
@@ -330,7 +330,7 @@
       
       <a class="index-excerpt " href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" target="_self">
         <div>
-          前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编
+          前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线 编写顶点和像素着色器的usf文件 在工程目录下的Shaders创建一个名为GraphicsShader.usf的文
         </div>
       </a>
 
@@ -410,7 +410,7 @@
       
       <a class="index-excerpt " href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" target="_self">
         <div>
-          前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 配置Unreal工程创建Unreal工程创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject打开工程文件夹下的LearnRDG.uproject，将Modules内的LoadingPharse从Defau
+          前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 ### 配置Unreal工程 #### 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  #### 配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的L
         </div>
       </a>
 
@@ -490,7 +490,7 @@
       
       <a class="index-excerpt " href="/2025/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93/02-Marschner%E6%A8%A1%E5%9E%8B/" target="_self">
         <div>
-          论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003参考资料：Study Notes On The Marschner Hair Shading Model | Blog 基本概念一个 Fiber（纤维，毛发）的由三个层次组成：  cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； cortex：皮质层，毛发内部的主
+          论文：Light Scattering from Human Hair Fibers, SIGGRAPH 2003 参考资料：Study Notes On The Marschner Hair Shading Model | Blog ### 基本概念 一个 Fiber（纤维，毛发）的由三个层次组成： 1. cuticle：角质层，位于毛发最外层，看起来像多个圆锥面重叠在一起； 2. cortex
         </div>
       </a>
 
