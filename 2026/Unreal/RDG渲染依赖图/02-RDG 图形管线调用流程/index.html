@@ -22,18 +22,18 @@
     <meta name="description" content="前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编">
 <meta property="og:type" content="article">
 <meta property="og:title" content="星生的小窝">
-<meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://onikatahoshio.github.io/IMG-20260127165041585.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/IMG-20260127165144256.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/IMG-20260127165226753.png">
-<meta property="article:published_time" content="2026-01-27T09:13:47.000Z">
-<meta property="article:modified_time" content="2026-01-31T09:56:32.076Z">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165144256.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165226753.png">
+<meta property="article:published_time" content="2026-01-31T10:17:55.012Z">
+<meta property="article:modified_time" content="2026-01-31T10:17:55.012Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://onikatahoshio.github.io/IMG-20260127165041585.png">
+<meta name="twitter:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
   
   
   
@@ -214,8 +214,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-01-27 17:13" pubdate>
-          2026年1月27日 下午
+        <time datetime="2026-01-31 18:17" pubdate>
+          2026年1月31日 晚上
         </time>
       </span>
     
@@ -324,7 +324,12 @@
 <p><code>GraphicsRDGHelper.cpp</code>的内容如下：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// Fill out your copyright notice in the Description page of Project Settings.</span><br><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;GraphicsRDGHelper.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;RenderGraphBuilder.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;Engine/TextureRenderTarget2D.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;LearnRDGShader.h&quot;</span></span><br><span class="hljs-comment">// Sets default values</span><br>AGraphicsRDGHelper::<span class="hljs-built_in">AGraphicsRDGHelper</span>()<br>&#123;<br> 	<span class="hljs-comment">// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don&#x27;t need it.</span><br>	PrimaryActorTick.bCanEverTick = <span class="hljs-literal">true</span>;<br>&#125;<br><br><span class="hljs-comment">// Called when the game starts or when spawned</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">AGraphicsRDGHelper::BeginPlay</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	Super::<span class="hljs-built_in">BeginPlay</span>();<br><br>	<span class="hljs-built_in">check</span>(GEngine != <span class="hljs-literal">nullptr</span>);<br><br>	<span class="hljs-keyword">if</span> (<span class="hljs-built_in">IsValid</span>(GraphicsRDGRenderTarget))<br>		<span class="hljs-built_in">AddTestGraphicsPass</span>(GraphicsRDGRenderTarget.<span class="hljs-built_in">Get</span>(), BValue);<br>&#125;<br><br><span class="hljs-comment">// Called every frame</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">AGraphicsRDGHelper::Tick</span><span class="hljs-params">(<span class="hljs-type">float</span> DeltaTime)</span></span><br><span class="hljs-function"></span>&#123;<br>	Super::<span class="hljs-built_in">Tick</span>(DeltaTime);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">AGraphicsRDGHelper::AddTestGraphicsPass</span><span class="hljs-params">(UTextureRenderTarget2D* RenderTarget2D, <span class="hljs-type">float</span> BChannelValue)</span> <span class="hljs-type">const</span></span><br><span class="hljs-function"></span>&#123;<br>	GEngine-&gt;<span class="hljs-built_in">AddOnScreenDebugMessage</span>(<span class="hljs-number">-1</span>, <span class="hljs-number">5.0f</span>, FColor::Yellow, <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;AddTestGraphicsPass&quot;</span>));<br><br>	FTextureResource* RenderResource = RenderTarget2D-&gt;<span class="hljs-built_in">GetResource</span>();<br><br>	<span class="hljs-built_in">ENQUEUE_RENDER_COMMAND</span>(AddTestGraphicsPass)(<br>		[RenderResource, BChannelValue](FRHICommandListImmediate&amp; RHICmdList)<br>		&#123;<br>			FRDGBuilder <span class="hljs-built_in">GraphBuilder</span>(RHICmdList);<br><br>			FTextureRHIRef TextureRHI = RenderResource-&gt;<span class="hljs-built_in">GetTextureRHI</span>();<br><br>			FRDGTextureRef RDGTexture =<br>				GraphBuilder.<span class="hljs-built_in">RegisterExternalTexture</span>(<br>					<span class="hljs-built_in">CreateRenderTarget</span>(TextureRHI, <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;MyRT2D_External&quot;</span>))<br>				);<br><br>			LearnRDGShader::<span class="hljs-built_in">AddTestGraphicsPass</span>(GraphBuilder, RDGTexture, BChannelValue);<br><br>			GraphBuilder.<span class="hljs-built_in">Execute</span>();<br>		&#125;<br>		);<br><br>	GEngine-&gt;<span class="hljs-built_in">AddOnScreenDebugMessage</span>(<span class="hljs-number">-1</span>, <span class="hljs-number">5.0f</span>, FColor::Yellow, <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;AddTestGraphicsPassFinish&quot;</span>));<br>&#125;<br><br></code></pre></td></tr></table></figure>
 
-<h3 id="在编辑器中创建蓝图"><a href="#在编辑器中创建蓝图" class="headerlink" title="在编辑器中创建蓝图"></a>在编辑器中创建蓝图</h3><p>接下来为刚刚编写的 C++ 类创建对应的 UE 蓝图，并新建一个 <code>Material</code> 和一个 <code>RenderTarget</code>。将该 <code>RenderTarget</code> 连接到 <code>Material</code> 的 Base Color（基础色）输入上，然后将该 <code>Material</code> 指定给对应的 UE 蓝图进行使用。<br><img src="/IMG-20260127165041585.png" srcset="/img/loading.gif" lazyload><br><img src="/IMG-20260127165144256.png" srcset="/img/loading.gif" lazyload><br>点击模拟，可以看到颜色已经正确地输入到纹理<br><img src="/IMG-20260127165226753.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="在编辑器中创建蓝图"><a href="#在编辑器中创建蓝图" class="headerlink" title="在编辑器中创建蓝图"></a>在编辑器中创建蓝图</h3><p>接下来为刚刚编写的 C++ 类创建对应的 UE 蓝图，并新建一个 <code>Material</code> 和一个 <code>RenderTarget</code>。将该 <code>RenderTarget</code> 连接到 <code>Material</code> 的 Base Color（基础色）输入上，然后将该 <code>Material</code> 指定给对应的 UE 蓝图进行使用。</p>
+<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165144256.png" srcset="/img/loading.gif" lazyload class="">
+<p>点击模拟，可以看到颜色已经正确地输入到纹理</p>
+<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165226753.png" srcset="/img/loading.gif" lazyload class="">
+
 <h3 id="AddFullScreenPass"><a href="#AddFullScreenPass" class="headerlink" title="AddFullScreenPass"></a>AddFullScreenPass</h3><p>对于仅包含全屏两个三角形的顶点数据，可以直接使用 Unreal 提供的 <code>AddFullScreenPass</code> 辅助函数来简化代码实现，具体用法可以参考 UE 的相关源码实现。需要注意的是，在使用该辅助函数时，像素着色器在通常情况下只能接收一个 <code>float4</code> 类型的“位置”输入。</p>
 <p>一个简单的例子：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;/Engine/Public/Platform.ush&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;/Engine/Private/Common.ush&quot;</span></span><br><br><span class="hljs-type">float</span> BValue;<br>float2 TargetSize;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">FullscreenPS</span><span class="hljs-params">(float4 InPosition : SV_POSITION,  out float4 OutColor : SV_Target0)</span></span><br><span class="hljs-function"></span>&#123;<br>    float2 UV = InPosition.xy / TargetSize;<br>    OutColor = <span class="hljs-built_in">float4</span>(UV.x, UV.y, BValue, <span class="hljs-number">1.0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
@@ -348,7 +353,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div></div>
-      <div>https://onikatahoshio.github.io/2026/Unreal/RDG渲染依赖图/02-RDG 图形管线调用流程/02-RDG 图形管线调用流程/</div>
+      <div>https://onikatahoshio.github.io/2026/Unreal/RDG渲染依赖图/02-RDG 图形管线调用流程/</div>
     </div>
     <div class="license-meta">
       
@@ -360,7 +365,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年1月27日</div>
+          <div>2026年1月31日</div>
         </div>
       
       
@@ -396,7 +401,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="">
+                      <a href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="">
                         <span class="hidden-mobile"></span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
