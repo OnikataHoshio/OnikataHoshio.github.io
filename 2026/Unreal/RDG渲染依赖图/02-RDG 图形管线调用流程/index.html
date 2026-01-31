@@ -26,14 +26,16 @@
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165144256.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165226753.png">
-<meta property="article:published_time" content="2026-01-31T10:17:55.012Z">
-<meta property="article:modified_time" content="2026-01-31T10:24:30.281Z">
+<meta property="og:image" content="https://onikatahoshio.github.io/img/Unreal/RDG/RDG-Graphics.png">
+<meta property="article:published_time" content="2026-01-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-01-31T10:36:58.082Z">
 <meta property="article:author" content="OnikataHoshio">
+<meta property="article:tag" content="RDG">
+<meta property="article:tag" content="图形管线">
+<meta property="article:tag" content="渲染依赖图">
+<meta property="article:tag" content="虚幻引擎">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
+<meta name="twitter:image" content="https://onikatahoshio.github.io/img/Unreal/RDG/RDG-Graphics.png">
   
   
   
@@ -214,8 +216,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-01-31 18:17" pubdate>
-          2026年1月31日 晚上
+        <time datetime="2026-01-27 00:00" pubdate>
+          2026年1月27日 凌晨
         </time>
       </span>
     
@@ -344,6 +346,19 @@
               <div class="post-metas my-3">
   
   
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%99%9A%E5%B9%BB%E5%BC%95%E6%93%8E/" class="print-no-link">#虚幻引擎</a>
+      
+        <a href="/tags/%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/" class="print-no-link">#渲染依赖图</a>
+      
+        <a href="/tags/RDG/" class="print-no-link">#RDG</a>
+      
+        <a href="/tags/%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF/" class="print-no-link">#图形管线</a>
+      
+    </div>
+  
 </div>
 
 
@@ -365,7 +380,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年1月31日</div>
+          <div>2026年1月27日</div>
         </div>
       
       
