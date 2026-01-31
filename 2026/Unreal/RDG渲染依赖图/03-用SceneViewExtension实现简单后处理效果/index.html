@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/Unreal/RDG/LearnSVE.png">
 <meta property="article:published_time" content="2026-01-31T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-01-31T13:47:11.256Z">
+<meta property="article:modified_time" content="2026-01-31T14:16:39.319Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="RDG">
 <meta property="article:tag" content="SceneViewExtension">
@@ -329,8 +329,10 @@ target="_blank" rel="noopener" href="https://github.com/OnikataHoshio/LearnRDG">
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">FRetroTVModule::StartupModule</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module</span><br>	FString PluginShaderDir = FPaths::<span class="hljs-built_in">Combine</span>(FPaths::<span class="hljs-built_in">ProjectPluginsDir</span>(), <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;/RetroTV/Shaders&quot;</span>));<br>	<span class="hljs-built_in">AddShaderSourceDirectoryMapping</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;/Plugins/RetroTVShaders&quot;</span>), PluginShaderDir);<br>&#125;<br></code></pre></td></tr></table></figure> 通过这一步配置，我们就可以将所有与该插件相关的
 <code>.usf</code> 着色器文件，直接放在插件目录下的 <code>Shaders</code>
 文件夹中，而不需要放入引擎或项目的全局 Shader 目录。最终的目录结构如下:
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp">LearnRDG<br>	|-Content<br>	|-Plugins<br>		|-RetroTV<br>			|-Shaders<br>			|-Source<br></code></pre></td></tr></table></figure> #### 配置模块依赖 接下来需要在
-<code>RetroTV.Build.cs</code> 中配置插件所需的模块依赖与路径依赖。<br />
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp">LearnRDG<br>	|-Content<br>	|-Plugins<br>		|-RetroTV<br>			|-Shaders<br>			|-Source<br></code></pre></td></tr></table></figure></p>
+<h4 id="配置模块依赖">配置模块依赖</h4>
+<p>接下来需要在 <code>RetroTV.Build.cs</code>
+中配置插件所需的模块依赖与路径依赖。<br />
 其中，自定义着色器和 RDG 功能依赖于
 <code>RenderCore</code>、<code>Renderer</code> 以及 <code>RHI</code>
 模块；<code>Projects</code> 模块用于配置 Shader 的虚拟路径映射；而
@@ -390,23 +392,26 @@ target="_blank" rel="noopener" href="https://github.com/OnikataHoshio/LearnRDG">
 <p>在<code>RetroTVSceneViewExtension.cpp</code>文件中，首先需要创建一个和<code>.usf</code>文件对应的计算着色器类，相关代码如下：
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">RETROTV_API</span> FLenDistortionCS : <span class="hljs-keyword">public</span> FGlobalShader<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-built_in">DECLARE_GLOBAL_SHADER</span>(FLenDistortionCS);<br>	<span class="hljs-built_in">SHADER_USE_PARAMETER_STRUCT</span>(FLenDistortionCS, FGlobalShader);<br><br>	<span class="hljs-built_in">BEGIN_SHADER_PARAMETER_STRUCT</span>(FParameters, )<br>		<span class="hljs-built_in">SHADER_PARAMETER_STRUCT</span>(FScreenPassTextureViewportParameters, SceneColorViewport)<br>		<span class="hljs-built_in">SHADER_PARAMETER_STRUCT_REF</span>(FViewUniformShaderParameters, View)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, RetroScaleFactor)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, LensDistortionK1)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, LensDistortionK2)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, VignetteStart)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, VignetteEnd)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, VignettePower)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, VignetteIntensity)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, ScanlineSpeed)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, ScanlineIntensity)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, ScanlineScale)<br>		<span class="hljs-built_in">SHADER_PARAMETER_RDG_TEXTURE</span>(Texture2D, OriginalSceneColor)<br>		<span class="hljs-built_in">SHADER_PARAMETER_TEXTURE</span>(Texture2D, TVMaskTexture)<br>		<span class="hljs-built_in">SHADER_PARAMETER_TEXTURE</span>(Texture2D, ScanLineTexture)<br>		<span class="hljs-built_in">SHADER_PARAMETER_RDG_TEXTURE_UAV</span>(RWTexture2D&lt;float4&gt;, Output)<br>	<span class="hljs-built_in">END_SHADER_PARAMETER_STRUCT</span>()<br><br>	<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">bool</span> <span class="hljs-title">ShouldCompilePermutation</span><span class="hljs-params">(<span class="hljs-type">const</span> FGlobalShaderPermutationParameters&amp; Parameters)</span></span><br><span class="hljs-function">	</span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-built_in">IsFeatureLevelSupported</span>(Parameters.Platform, ERHIFeatureLevel::SM5);<br>	&#125;<br><br>	<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">ModifyCompilationEnvironment</span><span class="hljs-params">(<span class="hljs-type">const</span> FGlobalShaderPermutationParameters&amp; Parameters, FShaderCompilerEnvironment&amp; OutEnvironment)</span></span><br><span class="hljs-function">	</span>&#123;<br>		OutEnvironment.<span class="hljs-built_in">SetDefine</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;THREADS_X&quot;</span>), <span class="hljs-number">8</span>);<br>		OutEnvironment.<span class="hljs-built_in">SetDefine</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;THREADS_Y&quot;</span>), <span class="hljs-number">8</span>);<br>		OutEnvironment.<span class="hljs-built_in">SetDefine</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;THREADS_Z&quot;</span>), <span class="hljs-number">1</span>);<br>	&#125;<br>&#125;;<br><br><span class="hljs-built_in">IMPLEMENT_GLOBAL_SHADER</span>(FLenDistortionCS, <span class="hljs-string">&quot;/Plugins/RetroTVShaders/LensDistortion.usf&quot;</span>, <span class="hljs-string">&quot;MainCS&quot;</span>, SF_Compute);<br></code></pre></td></tr></table></figure> 我们通过 <code>BEGIN_SHADER_PARAMETER_STRUCT()</code>
 显式声明该着色器所使用的所有全局变量。只有在这里正确地定义并绑定这些参数，才能确保
-C++ 侧的数据被正确传递到着色器中： 1.
-<code>SHADER_PARAMETER</code>：用于声明基础类型参数，例如
-<code>float</code>、<code>int</code>、<code>uint</code> 等常量数据； 2.
-<code>SHADER_PARAMETER_RDG_TEXTURE</code>：用于声明 <strong>由 RDG
+C++ 侧的数据被正确传递到着色器中：</p>
+<ol type="1">
+<li><code>SHADER_PARAMETER</code>：用于声明基础类型参数，例如
+<code>float</code>、<code>int</code>、<code>uint</code>
+等常量数据；</li>
+<li><code>SHADER_PARAMETER_RDG_TEXTURE</code>：用于声明 <strong>由 RDG
 创建并管理的只读纹理资源</strong>，通常作为 Shader Resource
-View（SRV）使用； 3. <code>SHADER_PARAMETER_RDG_TEXTURE</code>：用于声明
-<strong>位于 RDG 之外、由 RHI
-管理的只读纹理资源</strong>，常用于外部导入的纹理（如
-<code>UTexture2D</code>）； 4.
-<code>SHADER-PARAMETER_RDG_TEXTURE_UAV</code>：用于声明 <strong>由 RDG
-创建并管理的可读写纹理资源</strong>，通常作为 Compute Shader
-的输出目标（UAV）； 5.
-<code>SHADER_PARAMETER_STRUCT</code>：用于内嵌一个
-<strong>值拷贝形式的参数结构体</strong>，例如视口参数、常量打包参数等；
-6. <code>SHADER_PARAMETER_STRUCT_REF</code>：用于引用一个
+View（SRV）使用；</li>
+<li><code>SHADER_PARAMETER_RDG_TEXTURE</code>：用于声明 <strong>位于 RDG
+之外、由 RHI 管理的只读纹理资源</strong>，常用于外部导入的纹理（如
+<code>UTexture2D</code>）；</li>
+<li><code>SHADER-PARAMETER_RDG_TEXTURE_UAV</code>：用于声明 <strong>由
+RDG 创建并管理的可读写纹理资源</strong>，通常作为 Compute Shader
+的输出目标（UAV）；</li>
+<li><code>SHADER_PARAMETER_STRUCT</code>：用于内嵌一个
+<strong>值拷贝形式的参数结构体</strong>，例如视口参数、常量打包参数等；</li>
+<li><code>SHADER_PARAMETER_STRUCT_REF</code>：用于引用一个
 <strong>由引擎统一维护的参数结构体</strong>，常见的例子是
-<code>View</code>、<code>SceneTextures</code> 等；</p>
+<code>View</code>、<code>SceneTextures</code> 等；</li>
+</ol>
 <p>最后，通过调用 <code>IMPLEMENT_GLOBAL_SHADER()</code>
 将该着色器注册到 Unreal Engine
 中，确保其在启动或编译阶段被正确编译，并能够被引擎正常识别和使用。</p>
