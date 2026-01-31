@@ -19,16 +19,16 @@
   <meta name="author" content="OnikataHoshio">
   <meta name="keywords" content="">
   
-    <meta name="description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 ### 配置Unreal工程 #### 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的Loadin">
+    <meta name="description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 配置Unreal工程 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的LoadingPharse从D">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚幻引擎RDG计算管线调用流程">
 <meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
 <meta property="og:site_name" content="星生的小窝">
-<meta property="og:description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 ### 配置Unreal工程 #### 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的Loadin">
+<meta property="og:description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 配置Unreal工程 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的LoadingPharse从D">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/Unreal/RDG/RDG-Compute.png">
 <meta property="article:published_time" content="2026-01-24T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-01-31T14:14:52.725Z">
+<meta property="article:modified_time" content="2026-01-31T14:36:05.341Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="RDG">
 <meta property="article:tag" content="渲染依赖图">
@@ -295,8 +295,10 @@
                 <h3 id="前言">前言</h3>
 <p>这是我在学习 Unreal
 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。</p>
-<p>Unreal版本为5.7。 ### 配置Unreal工程 #### 创建Unreal工程
-创建一个空白C++虚幻工程，将项目名称设置为<code>LearnRDG</code>。
+<p>Unreal版本为5.7。</p>
+<h3 id="配置unreal工程">配置Unreal工程</h3>
+<h4 id="创建unreal工程">创建Unreal工程</h4>
+<p>创建一个空白C++虚幻工程，将项目名称设置为<code>LearnRDG</code>。
 <img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124194958682.png" srcset="/img/loading.gif" lazyload class=""></p>
 <h4 id="配置uproject">配置uproject</h4>
 <p>打开工程文件夹下的<code>LearnRDG.uproject</code>，将<code>Modules</code>内的<code>LoadingPharse</code>从<code>Default</code>修改为<code>PostConfigInit</code>。</p>
@@ -326,9 +328,10 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;/Engine/Public/Platform.ush&quot;</span></span><br><br><span class="hljs-type">float</span> Scale;<br><span class="hljs-type">float</span> Translate;<br>  <br>StructuredBuffer&lt;<span class="hljs-type">float</span>&gt; InputBuffer;<br>RWStructuredBuffer&lt;<span class="hljs-type">float</span>&gt; OutputBuffer;<br><br>[<span class="hljs-built_in">numthreads</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)]<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">MainCS</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    uint3 DispatchThreadId : SV_DispatchThreadID,</span></span><br><span class="hljs-params"><span class="hljs-function">    uint GroupIndex : SV_GroupIndex)</span></span><br><span class="hljs-function"></span>&#123;<br>    OutputBuffer[DispatchThreadId.x] = InputBuffer[DispatchThreadId.x] * Scale + Translate;<br>&#125;<br></code></pre></td></tr></table></figure></p>
 <p>（示例计算着色器来自：<a
 target="_blank" rel="noopener" href="https://sirenri2001.github.io/2025-02-05-unreal-shader-tutorial-(Chinese)/">Unreal
-Shader Tutorial - Chinese Ver. | SirEnri’s Homepage</a>） ####
-创建计算着色器的Global Shader 打开UE编辑器，选择
-工具-&gt;新建C++文件，父类选择
+Shader Tutorial - Chinese Ver. | SirEnri’s Homepage</a>）</p>
+<h4 id="创建计算着色器的global-shader">创建计算着色器的Global
+Shader</h4>
+<p>打开UE编辑器，选择 工具-&gt;新建C++文件，父类选择
 <strong>无</strong>，命名为<code>LearnRDGShader</code>。
 <img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124203441757.png" srcset="/img/loading.gif" lazyload class=""></p>
 <p>删除<code>LearnRDGShader.h</code>中<code>#include "CoreMinimal.h"</code>以下的所有代码，删除<code>LearnRDGShader.cpp</code>中的所有代码。</p>
