@@ -22,18 +22,18 @@
     <meta name="description" content="前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编">
 <meta property="og:type" content="article">
 <meta property="og:title" content="星生的小窝">
-<meta property="og:url" content="https://onikatahoshio.github.io/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前言这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（二），本篇主要记录在虚幻引擎中调用图形管线的实践过程。 虚幻版本5.7 本篇主要介绍如何通过 AddPass() 调用图形管线，Unreal 引擎的配置与上一篇相同。 在 UE 中使用 RDG 构建图形管线编写顶点和像素着色器的usf文件在工程目录下的Shaders创建一个名为GraphicsShader.usf的文件，编">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165144256.png">
-<meta property="og:image" content="https://onikatahoshio.github.io/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165226753.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165144256.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165226753.png">
 <meta property="article:published_time" content="2026-01-27T09:13:47.000Z">
 <meta property="article:modified_time" content="2026-01-31T09:20:22.198Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://onikatahoshio.github.io/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
+<meta name="twitter:image" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260127165041585.png">
   
   
   
@@ -359,7 +359,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div></div>
-      <div>https://onikatahoshio.github.io/2026/RDG渲染依赖图/02-RDG 图形管线调用流程/02-RDG 图形管线调用流程/</div>
+      <div>https://onikatahoshio.github.io/2026/Unreal/RDG渲染依赖图/02-RDG 图形管线调用流程/</div>
     </div>
     <div class="license-meta">
       
@@ -407,7 +407,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="">
+                      <a href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="">
                         <span class="hidden-mobile"></span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
