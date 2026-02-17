@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E9%A3%8E%E6%A0%BC%E5%8C%96%E6%B8%B2%E6%9F%93/%E7%82%B9%E6%9F%93.png">
 <meta property="article:published_time" content="2026-02-17T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-02-17T11:49:41.939Z">
+<meta property="article:modified_time" content="2026-02-17T11:51:32.195Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="流体动力学">
 <meta property="article:tag" content="点描">
@@ -350,8 +350,7 @@ class="math inline"><em>ρ</em></span> 大于 <span
 class="math inline"><em>ρ</em><sub>0</sub></span>
 时，粒子感受到正向压力并趋于向外扩张；反之，当密度低于参考密度时，产生的负压（吸引力）会促使粒子向内收缩，从而维持系统的质量分布平衡。</p>
 <blockquote>
-<p>[!NOTE]
-为了使迭代后的粒子分布与目标图像的灰度分布一致，我将图像的<strong>灰度值映射为粒子的参考密度
+<p>为了使迭代后的粒子分布与目标图像的灰度分布一致，我将图像的<strong>灰度值映射为粒子的参考密度
 <span
 class="math inline"><em>ρ</em><sub>0</sub></span></strong>。具体实现上，通过对粒子位置处的灰度图进行<strong>双线性插值</strong>来确定该点的
 <span
