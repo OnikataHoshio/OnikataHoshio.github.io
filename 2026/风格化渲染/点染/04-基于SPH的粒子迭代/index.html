@@ -26,15 +26,15 @@
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="最近我在做一个和点描（Stippling）相关的小项目：根据图片的灰度信息生成大量点的位置。实现这一目标的方法其实很多，比如误差扩散、Voronoi 质心剖分等等。每种方法都有它独特的美感和挑战。  在尝试这些算法的过程中，我突然想到：这些生成的点不就是一个个粒子吗？如果把它们看作粒子，那是不是可以借用平滑粒子流体动力学（SPH）的思想来探索新的可能性？或许能让点描的分布更自然、更具动态感。 虽然">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://onikatahoshio.github.io/img/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E9%A3%8E%E6%A0%BC%E5%8C%96%E6%B8%B2%E6%9F%93/%E7%82%B9%E6%9F%93.png">
+<meta property="og:image" content="https://onikatahoshio.github.io/img/Stippling.png">
 <meta property="article:published_time" content="2026-02-17T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-02-17T11:53:02.590Z">
+<meta property="article:modified_time" content="2026-02-17T12:00:33.873Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="流体动力学">
 <meta property="article:tag" content="点描">
 <meta property="article:tag" content="风格化">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://onikatahoshio.github.io/img/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/%E6%B8%B2%E6%9F%93/%E9%A3%8E%E6%A0%BC%E5%8C%96%E6%B8%B2%E6%9F%93/%E7%82%B9%E6%9F%93.png">
+<meta name="twitter:image" content="https://onikatahoshio.github.io/img/Stippling.png">
   
   
   
@@ -304,11 +304,11 @@ class="math inline"><em>ρ</em><sub><em>i</em></sub></span>
 分别为其质量与密度，<span class="math inline"><em>h</em></span>
 为平滑长度（Smoothing Length），决定了核函数的影响范围。</p>
 <p>在流体仿真中，我们通常更关注物理量对空间位置的导数。为了保证计算的数值稳定性，通常采用如下<strong>对称形式</strong>的经验公式来计算粒子
-<span class="math inline"><em>i</em></span> 处的梯度：</p>
-<p><span class="math display">$$\nabla \boldsymbol A_i = \rho_i \sum_j
-m_j \left( \frac{\boldsymbol A_i}{\rho_i^2} + \frac{\boldsymbol
-A_j}{\rho_j^2} \right) \nabla_{\boldsymbol x_i} W(\|\boldsymbol x_i -
-\boldsymbol x_j\|, h) \tag {2}$$</span></p>
+<span class="math inline"><em>i</em></span> 处的梯度： <span
+class="math display">$$\nabla \boldsymbol A_i = \rho_i \sum_j m_j \left(
+\frac{\boldsymbol A_i}{\rho_i^2} + \frac{\boldsymbol A_j}{\rho_j^2}
+\right) \nabla_{\boldsymbol x_i} W(\|\boldsymbol x_i - \boldsymbol
+x_j\|, h) \tag {2}$$</span></p>
 <p><strong>需要注意的是：</strong>
 这种形式并非数学意义上的严格导数，但在物理仿真中至关重要。它通过强制算子的<strong>对称性</strong>，确保了粒子间相互作用力的守恒（如动量守恒）。如果导数形式不对称，系统可能会产生非物理的数值驱动力，导致能量不守恒或模拟崩溃。</p>
 <h3 id="实现步骤">实现步骤</h3>
@@ -390,13 +390,11 @@ class="math inline"><em>σ</em><sub><em>d</em></sub></span>
 <p>在时间积分方案上，本项目直接采用<strong>显式欧拉法（Explicit Euler
 Method）</strong>来更新粒子的运动状态。其离散迭代公式如下：</p>
 <ol type="1">
-<li><p><strong>速度更新</strong>：</p>
-<p><span class="math display">$$\boldsymbol v_{t+1} = \boldsymbol v_{t}
-+ \Delta t \frac{\mathrm{D} \boldsymbol v}{\mathrm{D}
-t}$$</span></p></li>
-<li><p><strong>位置更新</strong>：</p>
-<p><span
-class="math display"><strong>x</strong><sub><em>t</em> + 1</sub> = <strong>x</strong><sub><em>t</em></sub> + <em>Δ</em><em>t</em><strong>v</strong><sub><em>t</em> + 1</sub></span></p></li>
+<li><strong>速度更新</strong>： <span class="math display">$$\boldsymbol
+v_{t+1} = \boldsymbol v_{t} + \Delta t \frac{\mathrm{D} \boldsymbol
+v}{\mathrm{D} t}$$</span></li>
+<li><strong>位置更新</strong>： <span
+class="math display"><strong>x</strong><sub><em>t</em> + 1</sub> = <strong>x</strong><sub><em>t</em></sub> + <em>Δ</em><em>t</em><strong>v</strong><sub><em>t</em> + 1</sub></span></li>
 </ol>
 <p>至此，系统完成了一次完整的时间步迭代。</p>
 <h3 id="效果展示">效果展示</h3>
