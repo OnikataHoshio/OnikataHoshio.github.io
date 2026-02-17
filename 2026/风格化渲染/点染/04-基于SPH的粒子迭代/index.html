@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/Stippling.png">
 <meta property="article:published_time" content="2026-02-17T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-02-17T12:10:08.850Z">
+<meta property="article:modified_time" content="2026-02-17T12:15:25.913Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="流体动力学">
 <meta property="article:tag" content="点描">
@@ -390,11 +390,13 @@ class="math inline"><em>σ</em><sub><em>d</em></sub></span>
 <p>在时间积分方案上，本项目直接采用<strong>显式欧拉法（Explicit Euler
 Method）</strong>来更新粒子的运动状态。其离散迭代公式如下：</p>
 <ol type="1">
-<li><strong>速度更新</strong>： <span class="math display">$$\boldsymbol
-v_{t+1} = \boldsymbol v_{t} + \Delta t \frac{\mathrm{D} \boldsymbol
-v}{\mathrm{D} t}$$</span></li>
-<li><strong>位置更新</strong>： <span
-class="math display"><strong>x</strong><sub><em>t</em> + 1</sub> = <strong>x</strong><sub><em>t</em></sub> + <em>Δ</em><em>t</em><strong>v</strong><sub><em>t</em> + 1</sub></span></li>
+<li><p><strong>速度更新</strong>：</p>
+<p><span class="math display">$$\boldsymbol v_{t+1} = \boldsymbol v_{t}
++ \Delta t \frac{\mathrm{D} \boldsymbol v}{\mathrm{D}
+t}$$</span></p></li>
+<li><p><strong>位置更新</strong>：</p>
+<p><span
+class="math display"><strong>x</strong><sub><em>t</em> + 1</sub> = <strong>x</strong><sub><em>t</em></sub> + <em>Δ</em><em>t</em><strong>v</strong><sub><em>t</em> + 1</sub></span></p></li>
 </ol>
 <p>至此，系统完成了一次完整的时间步迭代。</p>
 <h3 id="效果展示">效果展示</h3>
