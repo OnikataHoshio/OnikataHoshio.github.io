@@ -22,7 +22,7 @@
     <meta name="description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 配置Unreal工程 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的LoadingPharse从D">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚幻引擎RDG计算管线调用流程">
-<meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:url" content="https://onikatahoshio.github.io/posts/1e1e3ff3.html">
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前言 这是我在学习 Unreal 渲染依赖图（RDG）过程中的踩坑与总结笔记（一），本篇主要记录在虚幻引擎中调用计算着色器的实践过程。 Unreal版本为5.7。 配置Unreal工程 创建Unreal工程 创建一个空白C++虚幻工程，将项目名称设置为LearnRDG。  配置uproject 打开工程文件夹下的LearnRDG.uproject，将Modules内的LoadingPharse从D">
 <meta property="og:locale" content="zh_CN">
@@ -291,7 +291,7 @@
 <h3 id="配置Unreal工程">配置Unreal工程</h3>
 <h4 id="创建Unreal工程">创建Unreal工程</h4>
 <p>创建一个空白C++虚幻工程，将项目名称设置为<code>LearnRDG</code>。</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124194958682.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260124194958682.png" srcset="/img/loading.gif" lazyload class="">
 <h4 id="配置uproject">配置uproject</h4>
 <p>打开工程文件夹下的<code>LearnRDG.uproject</code>，将<code>Modules</code>内的<code>LoadingPharse</code>从<code>Default</code>修改为<code>PostConfigInit</code>。</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs javaScript"><span class="hljs-string">&quot;Modules&quot;</span>: [<br>	&#123;<br>		<span class="hljs-string">&quot;Name&quot;</span>: <span class="hljs-string">&quot;LearnRDG&quot;</span>,<br>		<span class="hljs-string">&quot;Type&quot;</span>: <span class="hljs-string">&quot;Runtime&quot;</span>,<br>		<span class="hljs-comment">// &quot;LoadingPharse&quot;: &quot;Default&quot;,</span><br>		<span class="hljs-string">&quot;LoadingPhase&quot;</span>: <span class="hljs-string">&quot;PostConfigInit&quot;</span>,<br>		<span class="hljs-string">&quot;AdditionalDependencies&quot;</span>: [<br>			<span class="hljs-string">&quot;Engine&quot;</span><br>		]<br>	&#125;<br>]<br></code></pre></td></tr></table></figure>
@@ -314,7 +314,7 @@
 <p>（示例计算着色器来自：<a target="_blank" rel="noopener" href="https://sirenri2001.github.io/2025-02-05-unreal-shader-tutorial-(Chinese)/">Unreal Shader Tutorial - Chinese Ver. | SirEnri’s Homepage</a>）</p>
 <h4 id="创建计算着色器的Global-Shader">创建计算着色器的Global Shader</h4>
 <p>打开UE编辑器，选择 工具-&gt;新建C++文件，父类选择 <strong>无</strong>，命名为<code>LearnRDGShader</code>。</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124203441757.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260124203441757.png" srcset="/img/loading.gif" lazyload class="">
 <p>删除<code>LearnRDGShader.h</code>中<code>#include &quot;CoreMinimal.h&quot;</code>以下的所有代码，删除<code>LearnRDGShader.cpp</code>中的所有代码。</p>
 <p>在<code>LearnRDGShader.cpp</code>中编写以下代码：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;LearnRDGShader.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;GlobalShader.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;RenderGraphBuilder.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ShaderParameterStruct.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;RenderGraphDefinitions.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;RenderGraphUtils.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;RHIGPUReadback.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;ScreenPass.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;PixelShaderUtils.h&quot;</span></span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">LEARNRDG_API</span> FTestCS : <span class="hljs-keyword">public</span> FGlobalShader<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-built_in">DECLARE_GLOBAL_SHADER</span>(FTestCS);<br>	<span class="hljs-built_in">SHADER_USE_PARAMETER_STRUCT</span>(FTestCS, FGlobalShader);<br><br>	<span class="hljs-built_in">BEGIN_SHADER_PARAMETER_STRUCT</span>(FParameters, )<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, Scale)<br>		<span class="hljs-built_in">SHADER_PARAMETER</span>(<span class="hljs-type">float</span>, Translate)<br>		<span class="hljs-built_in">SHADER_PARAMETER_RDG_BUFFER_SRV</span>(StructuredBuffer&lt;<span class="hljs-type">float</span>&gt;, InputBuffer)<br>		<span class="hljs-built_in">SHADER_PARAMETER_RDG_BUFFER_UAV</span>(RWStructuredBuffer&lt;<span class="hljs-type">float</span>&gt;, OutputBuffer)<br>	<span class="hljs-built_in">END_SHADER_PARAMETER_STRUCT</span>()<br><br>	<span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">bool</span> <span class="hljs-title">ShouldCompilePermutation</span><span class="hljs-params">(<span class="hljs-type">const</span> FGlobalShaderPermutationParameters&amp; Parameters)</span></span><br><span class="hljs-function">	</span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>	&#125;<br>&#125;;<br><br><span class="hljs-built_in">IMPLEMENT_GLOBAL_SHADER</span>(FTestCS, <span class="hljs-string">&quot;/MyShaders/ComputeShader.usf&quot;</span>, <span class="hljs-string">&quot;MainCS&quot;</span>, SF_Compute);<br></code></pre></td></tr></table></figure>
@@ -354,9 +354,9 @@
 <p>与 RDG 相关的操作必须在<strong>渲染线程Render Thread</strong>中执行，如果在<strong>游戏线程Game Thread</strong>中直接调用，将导致程序崩溃。因此需要使用 <code>ENQUEUE_RENDER_COMMAND()</code> 将相关逻辑封装并提交到渲染线程执行。</p>
 <h3 id="在编辑器中创建蓝图">在编辑器中创建蓝图</h3>
 <p>为刚刚编写的 C++ 类创建对应的 UE 蓝图，将其拖入场景中并点击 <strong>Simulate</strong> 进行运行。</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124214249038.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260124214249038.png" srcset="/img/loading.gif" lazyload class="">
 <p>随后查看输出目录，可以发现计算结果已成功从 GPU 回读到 CPU。</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/01-RDG%20%E8%AE%A1%E7%AE%97%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/IMG-20260124214329509.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260124214329509.png" srcset="/img/loading.gif" lazyload class="">
                 
               </div>
             
@@ -415,7 +415,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>虚幻引擎RDG计算管线调用流程</div>
-      <div>https://onikatahoshio.github.io/2026/Unreal/RDG渲染依赖图/01-RDG 计算管线调用流程/</div>
+      <div>https://onikatahoshio.github.io/posts/1e1e3ff3.html</div>
     </div>
     <div class="license-meta">
       
@@ -459,7 +459,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="虚幻引擎RDG图形管线调用流程">
+                      <a href="/posts/69024c91.html" title="虚幻引擎RDG图形管线调用流程">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">虚幻引擎RDG图形管线调用流程</span>
                         <span class="visible-mobile">上一篇</span>

@@ -22,7 +22,7 @@
     <meta name="description" content="前言 前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重载对应的虚函数，我们可以实现例如：">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚幻引擎用SceneViewExtension实现简单后处理效果">
-<meta property="og:url" content="https://onikatahoshio.github.io/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/index.html">
+<meta property="og:url" content="https://onikatahoshio.github.io/posts/ac010317.html">
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前言 前两篇文章介绍了虚幻引擎中计算管线和图形管线的调用流程，但示例中仅在某个 Actor 的 BeginPlay() 中调用了一次。如果希望在每一帧都执行这个自定义管线，又该如何实现呢？ 这时就需要借助 SceneViewExtension。SceneViewExtension 为我们提供了渲染流程中多个阶段的 Hook，既涵盖游戏线程，也包含渲染线程。通过重载对应的虚函数，我们可以实现例如：">
 <meta property="og:locale" content="zh_CN">
@@ -302,7 +302,7 @@
 <h4 id="配置虚拟路径映射">配置虚拟路径映射</h4>
 <p>打开虚幻引擎，依次点击 <strong>编辑 → 插件 → 添加</strong>，创建一个新的插件，这里将其命名为 <strong>RetroTV</strong>。<br>
 创建完成后，插件结构如下图所示：</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/IMG-20260131211504097.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260131211504097.png" srcset="/img/loading.gif" lazyload class="">
 <p>随后打开生成的 <strong>C++ 项目</strong>，在 <code>RetroTV.cpp</code> 中为插件添加 <code>Shaders</code> 目录的<strong>虚拟路径映射</strong>。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">FRetroTVModule::StartupModule</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module</span><br>	FString PluginShaderDir = FPaths::<span class="hljs-built_in">Combine</span>(FPaths::<span class="hljs-built_in">ProjectPluginsDir</span>(), <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;/RetroTV/Shaders&quot;</span>));<br>	<span class="hljs-built_in">AddShaderSourceDirectoryMapping</span>(<span class="hljs-built_in">TEXT</span>(<span class="hljs-string">&quot;/Plugins/RetroTVShaders&quot;</span>), PluginShaderDir);<br>&#125;<br></code></pre></td></tr></table></figure>
 <p>通过这一步配置，我们就可以将所有与该插件相关的 <code>.usf</code> 着色器文件，直接放在插件目录下的 <code>Shaders</code> 文件夹中，而不需要放入引擎或项目的全局 Shader 目录。最终的目录结构如下:</p>
@@ -377,7 +377,7 @@
 <p>因此，新建一个C++类，父类选择<code>DeveloperSettings</code>，并在类中声明两个<code>UTexture2D</code>变量：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">UTexture2D</span>;<br><br><span class="hljs-built_in">UCLASS</span>(Config = RetroTV, DefaultConfig, meta=(DisplayName=<span class="hljs-string">&quot;RetroTV&quot;</span>))<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">RETROTV_API</span> URetroTVSettings : <span class="hljs-keyword">public</span> UDeveloperSettings<br>&#123;<br>	<span class="hljs-built_in">GENERATED_BODY</span>()<br><br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-built_in">UPROPERTY</span>(EditAnywhere, Config, Category = <span class="hljs-string">&quot;Textures&quot;</span>)<br>	TSoftObjectPtr&lt;UTexture2D&gt; TVMaskTexture;<br><br>	<span class="hljs-built_in">UPROPERTY</span>(EditAnywhere, Config, Category = <span class="hljs-string">&quot;Textures&quot;</span>)<br>	TSoftObjectPtr&lt;UTexture2D&gt; ScanLineTexture;<br><br>	<span class="hljs-built_in">URetroTVSettings</span>() = <span class="hljs-keyword">default</span>;<br>&#125;;<br><br></code></pre></td></tr></table></figure>
 <p>现在打开UE的项目设置，找到RetroTV标签，打开之后就能指定资源了。</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/IMG-20260131211529221.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260131211529221.png" srcset="/img/loading.gif" lazyload class="">
 <h3 id="实例化自定义SVE类">实例化自定义SVE类</h3>
 <p>在<code>Subsystem</code>中实例化SVE类是比较推荐的做法。因此新建一个C++类，命名为<code>RetroTVSubsystem</code>，父类选择<code>UGameInstanceSubsystem</code>。<br>
 它需要维护一个SVE类，并在这个子系统初始化的时候，用<code>UTexture2D</code>初始化SVE类中纹理资源。相关代码如下：</p>
@@ -387,7 +387,7 @@
 <p>至此所有代码编辑完成。</p>
 <h3 id="最终效果">最终效果</h3>
 <p>点击模拟（第一次模拟可能会出现问题，大概率是因为资源还没有完全加载完毕），在控制台输入<code>r.RetroTV 1</code>即可启用这个后处理效果：</p>
-<img src="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/03-%E7%94%A8SceneViewExtension%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E5%90%8E%E5%A4%84%E7%90%86%E6%95%88%E6%9E%9C/IMG-20260131212439161.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/posts/undefined/IMG-20260131212439161.png" srcset="/img/loading.gif" lazyload class="">
 
                 
               </div>
@@ -454,7 +454,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>虚幻引擎用SceneViewExtension实现简单后处理效果</div>
-      <div>https://onikatahoshio.github.io/2026/Unreal/RDG渲染依赖图/03-用SceneViewExtension实现简单后处理效果/</div>
+      <div>https://onikatahoshio.github.io/posts/ac010317.html</div>
     </div>
     <div class="license-meta">
       
@@ -498,7 +498,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/%E9%A3%8E%E6%A0%BC%E5%8C%96%E6%B8%B2%E6%9F%93/%E7%82%B9%E6%9F%93/04-%E5%9F%BA%E4%BA%8ESPH%E7%9A%84%E7%B2%92%E5%AD%90%E8%BF%AD%E4%BB%A3/" title="流动的点描：基于 WCSPH 流体动力学的图像风格化实践">
+                      <a href="/posts/f114c33e.html" title="流动的点描：基于 WCSPH 流体动力学的图像风格化实践">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">流动的点描：基于 WCSPH 流体动力学的图像风格化实践</span>
                         <span class="visible-mobile">上一篇</span>
@@ -508,7 +508,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/Unreal/RDG%E6%B8%B2%E6%9F%93%E4%BE%9D%E8%B5%96%E5%9B%BE/02-RDG%20%E5%9B%BE%E5%BD%A2%E7%AE%A1%E7%BA%BF%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B/" title="虚幻引擎RDG图形管线调用流程">
+                      <a href="/posts/69024c91.html" title="虚幻引擎RDG图形管线调用流程">
                         <span class="hidden-mobile">虚幻引擎RDG图形管线调用流程</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
