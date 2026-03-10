@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/GPU-MortonCode.png">
 <meta property="article:published_time" content="2026-03-10T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-10T12:38:34.708Z">
+<meta property="article:modified_time" content="2026-03-10T13:34:11.639Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="莫顿码">
 <meta property="article:tag" content="高性能计算">
@@ -304,7 +304,7 @@
 <p>这种构造方式在结果上毫无疑问是准确的，然而在性能上却称不上优秀：原因在于它逐位交错排列坐标分量的比特位，每次迭代都涉及多次移位与按位操作，整体运算开销较大。</p>
 <h3 id="高效莫顿码生成：位扩展与掩码方法">高效莫顿码生成：位扩展与掩码方法</h3>
 <p>为了加速莫顿码的构建，我们可以借助<strong>分治思想</strong>来处理坐标分量的二进制表示。</p>
-<p>我们的目标是将一个不超过 10 位有效位的数扩展为 32 位，其中在相邻的有效比特之间插入 2 个0填充位：</p>
+<p>我们的目标是将一个不超过 10 位有效位的数扩展为 32 位，其中在相邻的有效比特之间插入 2 个 0 填充位：</p>
 <ul>
 <li>输入：<code>0000 0000 0000 0000 0000 00ab cdef ghij</code></li>
 <li>输出：<code>0000 a00b 00c0 0d00 e00f 00g0 0h00 i00j</code></li>
@@ -359,7 +359,7 @@
 <h5 id="1位有效位">1位有效位</h5>
 <p>最后一轮也是相同的逻辑，就不过多解释了，最终的计算逻辑为：<br>
 <code>(var × 0b0101) &amp; 0100 1001 0010 0100 1001 0010 0100 1001</code></p>
-<p>最终的记过为<code>0000 1001 0010 0100 1001 0010 0100 1001</code>。</p>
+<p>最终结果为<code>0000 1001 0010 0100 1001 0010 0100 1001</code>。</p>
 <h4 id="具体代码">具体代码</h4>
 <p>将例子中的二进制转化为十六进制，即可很轻松地得到高效莫顿编码的代码：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">uint32_t</span> <span class="hljs-title">ExpandBits</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> v)</span></span><br><span class="hljs-function"></span>&#123;<br>	v = (v * <span class="hljs-number">0x00010001u</span>) &amp; <span class="hljs-number">0xFF0000FFu</span>;<br>	v = (v * <span class="hljs-number">0x00000101u</span>) &amp; <span class="hljs-number">0x0F00F00Fu</span>;<br>	v = (v * <span class="hljs-number">0x00000011u</span>) &amp; <span class="hljs-number">0xC30C30C3u</span>;<br>	v = (v * <span class="hljs-number">0x00000005u</span>) &amp; <span class="hljs-number">0x49249249u</span>;<br><br>	<span class="hljs-keyword">return</span> v;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">uint32_t</span> <span class="hljs-title">Morton3D_MagicBits</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> x, <span class="hljs-type">uint32_t</span> y, <span class="hljs-type">uint32_t</span> z)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">if</span> ((x | y | z) &gt; <span class="hljs-number">1023u</span>)<br>	&#123;<br>		<span class="hljs-built_in">LOG_W</span>(std::format(<span class="hljs-string">&quot;KH_MortonCode::Morton3D_MagicBits: Input (&#123;&#125;, &#123;&#125;, &#123;&#125;) out of 10-bit range [0, 1023].&quot;</span>, x, y, z));<br>		x &amp;= <span class="hljs-number">1023</span>; y &amp;= <span class="hljs-number">1023</span>; z &amp;= <span class="hljs-number">1023</span>;<br>	&#125;<br><br>	<span class="hljs-type">uint32_t</span> bit_x = <span class="hljs-built_in">ExpandBits</span>(x);<br>	<span class="hljs-type">uint32_t</span> bit_y = <span class="hljs-built_in">ExpandBits</span>(y);<br>	<span class="hljs-type">uint32_t</span> bit_z = <span class="hljs-built_in">ExpandBits</span>(z);<br><br>	<span class="hljs-keyword">return</span> (bit_x &lt;&lt; <span class="hljs-number">2</span>) | (bit_y &lt;&lt; <span class="hljs-number">1</span>) | bit_z;<br>&#125;<br><br></code></pre></td></tr></table></figure>
