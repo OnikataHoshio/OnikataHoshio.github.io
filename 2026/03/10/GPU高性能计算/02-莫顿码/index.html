@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/GPU-MortonCode.png">
 <meta property="article:published_time" content="2026-03-10T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-10T12:12:03.840Z">
+<meta property="article:modified_time" content="2026-03-10T12:38:34.708Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="莫顿码">
 <meta property="article:tag" content="高性能计算">
@@ -322,8 +322,7 @@
 <li><code>d = 1111 1111</code></li>
 </ul>
 <blockquote>
-<p>[!NOTE]<br>
-为了简化表达，这里约定：全为 0 的位分组记为 <strong>0</strong>，全为 1 的位分组记为 <strong>1</strong>，而末位为 1、其余位为 0 的位分组记为 <strong>2</strong>。在 8 位有效位的情况下，<strong>0 = 0000 0000</strong>，<strong>1 = 1111 1111</strong>，<strong>2= 0000 0001</strong>。</p>
+<p>为了简化表达，这里约定：全为 0 的位分组记为 <strong>0</strong>，全为 1 的位分组记为 <strong>1</strong>，而末位为 1、其余位为 0 的位分组记为 <strong>2</strong>。在 8 位有效位的情况下，<strong>0 = 0000 0000</strong>，<strong>1 = 1111 1111</strong>，<strong>2= 0000 0001</strong>。</p>
 </blockquote>
 <p>此时，包含最低10比特的<strong>位</strong>即位有效位，即 <code>c</code> 和 <code>d</code>。我们需要将 <code>0 0 c d</code> 转换为 <code>c 0 0 d</code>。实现方法是：将 <code>0 0 c d</code> 左移两个有效位并按位或，再与 <code>1 0 0 1</code> 按位与即可。为了简化描述，可以用一次乘法来表示左移并按位或的操作，整体逻辑为：</p>
 <p><code>(0 0 c d × 0 2 0 2)  &amp;  1 0 0 1 = c 0 0 d</code></p>
