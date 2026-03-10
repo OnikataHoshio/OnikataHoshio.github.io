@@ -1,0 +1,750 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OnikataHoshio">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="在 CPU 中，图像通常采用线性存储方式，即行优先顺序。然而，这种方式对 GPU 并不友好。原因在于，GPU 在执行片段着色器等操作时，往往需要同时访问某个像素及其周围的邻域像素，例如双线性插值。 若采用线性排列存储，当访问一个 2×2 像素块时，上方两个像素与下方两个像素在内存中的位置相距较远，导致 GPU 必须进行两次独立的内存访问。 如果能够将相邻的 2×2 像素块存储在一起，便可将两次访问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能计算：莫顿码">
+<meta property="og:url" content="https://onikatahoshio.github.io/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/index.html">
+<meta property="og:site_name" content="星生的小窝">
+<meta property="og:description" content="在 CPU 中，图像通常采用线性存储方式，即行优先顺序。然而，这种方式对 GPU 并不友好。原因在于，GPU 在执行片段着色器等操作时，往往需要同时访问某个像素及其周围的邻域像素，例如双线性插值。 若采用线性排列存储，当访问一个 2×2 像素块时，上方两个像素与下方两个像素在内存中的位置相距较远，导致 GPU 必须进行两次独立的内存访问。 如果能够将相邻的 2×2 像素块存储在一起，便可将两次访问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://onikatahoshio.github.io/img/GPU-MortonCode.png">
+<meta property="article:published_time" content="2026-03-10T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T12:07:12.864Z">
+<meta property="article:author" content="OnikataHoshio">
+<meta property="article:tag" content="莫顿码">
+<meta property="article:tag" content="高性能计算">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://onikatahoshio.github.io/img/GPU-MortonCode.png">
+  
+  
+  
+  <title>高性能计算：莫顿码 - 星生的小窝</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"onikatahoshio.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>星生的小窝</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="高性能计算：莫顿码"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-03-10 20:00" pubdate>
+          2026年3月10日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">高性能计算：莫顿码</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>在 CPU 中，图像通常采用<strong>线性存储</strong>方式，即行优先顺序。然而，这种方式对 GPU 并不友好。原因在于，GPU 在执行片段着色器等操作时，往往需要同时访问某个像素及其周围的邻域像素，例如双线性插值。</p>
+<p>若采用线性排列存储，当访问一个 2×2 像素块时，上方两个像素与下方两个像素在内存中的位置相距较远，导致 GPU 必须进行<strong>两次独立的内存访问</strong>。</p>
+<p>如果能够将相邻的 2×2 像素块存储在一起，便可将两次访问<strong>合并为一次</strong>，从而显著提升访问效率。同时，这种存储方式也更有利于 GPU 线程之间的协同工作。</p>
+<p>那么，是否存在这样的存储方式呢？答案是肯定的，其名为 <strong>莫顿码（Morton Code）</strong>。在这种排列方式下，图像像素会按照莫顿码顺序进行组织，如下图所示。</p>
+<img src="/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/IMG-20260310172612661.png" srcset="/img/loading.gif" lazyload class="">
+<p>不难发现莫顿码的顺序形成了一个Z字形曲线，因此也被称为<strong>Z-order curve</strong>。</p>
+<p>除了在 GPU 中的图像存储之外，<strong>莫顿码（Morton Code）</strong> 还被广泛应用于三维空间中的对象组织及相关算法。例如，它常用于 GPU 并行构建 <strong>LBVH</strong>。因此，本篇文章的核心主题是：如何根据三维坐标 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,y,z)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span></span></span></span> 构建具有局部连续性的莫顿码。</p>
+<h3 id="三维莫顿码">三维莫顿码</h3>
+<p>三维莫顿码的构建并不复杂，其核心思想是将三维坐标 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo separator="true">,</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(x,y,z)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="mclose">)</span></span></span></span> 的各比特位依次交错排列，从而生成具有空间局部性的编码：</p>
+<img src="/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/IMG-20260310172612687.png" srcset="/img/loading.gif" lazyload class="">
+<p>在图例中，假设输入的三维坐标为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2,5,4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">4</span><span class="mclose">)</span></span></span></span>。我们只需将该坐标的各个分量分别转换为二进制表示，并依次交错排列它们的比特位。经过这一过程，最终得到的莫顿码结果为 <strong>226</strong>。</p>
+<blockquote>
+<p>[!NOTE]<br>
+莫顿码对三维坐标的输入并非毫无限制。通过观察图例可以发现，当输入数据为 3 比特时，其对应的莫顿码长度为 9 比特。而在 GPU 中，我们通常使用一个整型或无符号整型来表示索引，这就限制了莫顿码的最大长度为 32 比特。换言之，对应到三维坐标时，每个分量最多只能使用 10 比特，即数值不能超过 <strong>1023</strong>。</p>
+</blockquote>
+<p>根据图例中的莫顿码构建过程，我们可以很轻松地得到对应的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">uint32_t</span> <span class="hljs-title">Morton3D</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> x, <span class="hljs-type">uint32_t</span> y, <span class="hljs-type">uint32_t</span> z)</span></span><br><span class="hljs-function"></span>&#123;<br><br>	<span class="hljs-keyword">if</span> ((x | y | z) &gt; <span class="hljs-number">1023u</span>)<br>	&#123;<br>		<span class="hljs-built_in">LOG_W</span>(std::format(<span class="hljs-string">&quot;KH_MortonCode::Morton3D: Input (&#123;&#125;, &#123;&#125;, &#123;&#125;) out of 10-bit range [0, 1023].&quot;</span>, x, y, z));<br>		x &amp;= <span class="hljs-number">1023</span>; y &amp;= <span class="hljs-number">1023</span>; z &amp;= <span class="hljs-number">1023</span>;<br>	&#125;<br><br>	<span class="hljs-type">int</span> morton = <span class="hljs-number">0</span>;<br><br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++)<br>	&#123;<br>		<span class="hljs-type">int</span> bit_x = ((x &gt;&gt; i) &amp; <span class="hljs-number">0b01</span>) &lt;&lt; (i * <span class="hljs-number">3</span> + <span class="hljs-number">2</span>);<br>		<span class="hljs-type">int</span> bit_y = ((y &gt;&gt; i) &amp; <span class="hljs-number">0b01</span>) &lt;&lt; (i * <span class="hljs-number">3</span> + <span class="hljs-number">1</span>);<br>		<span class="hljs-type">int</span> bit_z = ((z &gt;&gt; i) &amp; <span class="hljs-number">0b01</span>) &lt;&lt; (i * <span class="hljs-number">3</span> + <span class="hljs-number">0</span>);<br>		morton |= bit_x | bit_y | bit_z;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> morton;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这种构造方式在结果上毫无疑问是准确的，然而在性能上却称不上优秀：原因在于它逐位交错排列坐标分量的比特位，每次迭代都涉及多次移位与按位操作，整体运算开销较大。</p>
+<h3 id="高效莫顿码生成：位扩展与掩码方法">高效莫顿码生成：位扩展与掩码方法</h3>
+<p>为了加速莫顿码的构建，我们可以借助<strong>分治思想</strong>来处理坐标分量的二进制表示。</p>
+<p>我们的目标是将一个不超过 10 位有效位的数扩展为 32 位，其中在相邻的有效比特之间插入 2 个0填充位：</p>
+<ul>
+<li>输入：<code>0000 0000 0000 0000 0000 00ab cdef ghij</code></li>
+<li>输出：<code>0000 a00b 00c0 0d00 e00f 00g0 0h00 i00j</code></li>
+</ul>
+<p>如果仅仅展示输入与输出，难免显得生硬。为了更清晰地说明这一算法，我们需要对 <strong>有效位</strong> 进行新的定义：有效位不再局限于单个比特，而是可以由多个比特组合而成。例如，当我们将 4 个比特视为一个有效位时，就以 4 位为一个整体进行处理。</p>
+<p>在有了这一新的定义之后，后续的逻辑就变得清晰了。我们首先将 8 个比特视为一个有效位，并在扩展时在两个有效位之间插入 2 个填充位（即值为 0 的 16 比特填充）。接着，将 4 个比特作为一个有效位，再然后是 2 个比特，最后细化到单个比特。通过这种逐步分解与扩展的方式，最终即可得到目标结果。</p>
+<h4 id="一个具体例子">一个具体例子</h4>
+<p>为了更直观地展示计算过程，我们假设输入数据为： <code>0000 0000 0000 0000 0000 0011 1111 1111</code></p>
+<h5 id="8位有效位">8位有效位</h5>
+<p>首先将 8 位视为一个有效位，输入数据可以表示为 <code>a b c d</code>，其中：</p>
+<ul>
+<li><code>a = 0000 0000 = 0</code></li>
+<li><code>b = 0000 0000 = 0</code></li>
+<li><code>c = 0000 0011</code></li>
+<li><code>d = 1111 1111</code></li>
+</ul>
+<blockquote>
+<p>[!NOTE]<br>
+为了简化表达，这里约定：全为 0 的位分组记为 <strong>0</strong>，全为 1 的位分组记为 <strong>1</strong>，而末位为 1、其余位为 0 的位分组记为 <strong>2</strong>。在 8 位有效位的情况下，<strong>0 = 0000 0000</strong>，<strong>1 = 1111 1111</strong>，<strong>2= 0000 0001</strong>。</p>
+</blockquote>
+<p>此时，包含最低10比特的<strong>位</strong>即位有效位，即 <code>c</code> 和 <code>d</code>。我们需要将 <code>0 0 c d</code> 转换为 <code>c 0 0 d</code>。实现方法是：将 <code>0 0 c d</code> 左移两个有效位并按位或，再与 <code>1 0 0 1</code> 按位与即可。为了简化描述，可以用一次乘法来表示左移并按位或的操作，整体逻辑为：</p>
+<p><code>(0 0 c d × 0 2 0 2)  &amp;  1 0 0 1 = c 0 0 d</code></p>
+<p>其中：</p>
+<ul>
+<li><code>0 0 c d = 0000 0000 0000 0000 0000 0011 1111 1111</code></li>
+<li><code>0 2 0 2 = 0000 0000 0000 0001 0000 0000 0000 0001</code></li>
+<li><code>0 0 c d * 0 1 0 1 = c d c d = 0000 0011 1111 1111 0000 0011 1111 1111</code></li>
+<li><code>(0 0 c d * 0 2 0 2) &amp; 1 0 0 1 = c 0 0 d = 0000 0011 0000 0000 0000 0000 1111 1111</code></li>
+</ul>
+<h5 id="4位有效位">4位有效位</h5>
+<p>随后我们将 4 位视为一个有效位。上一轮的输出 <code>0000 0011 0000 0000 0000 0000 1111 1111</code> 可以表示为 <code>a b c d e f g h</code>。</p>
+<p>此时，包含初始输入数据最低 10 比特的分组即为有效位，即：</p>
+<ul>
+<li><code>b = 0011</code></li>
+<li><code>g = 1111</code></li>
+<li><code>h = 1111</code></li>
+</ul>
+<p>我们需要将 <code>0 b 0 0 0 0 g h</code> 转换为 <code>0 b 0 0 g 0 0 h</code>，也就是在有效位之间插入两个有效位长度的零填充。其计算逻辑为：<br>
+<code>(0 b 0 0 0 0 g h × 0 0 0 0 0 2 0 2) &amp; 0 1 0 0 1 0 0 1 = 0 b 0 0 g 0 0 h</code></p>
+<p>最终结果为<code>0000 0011 0000 0000 1111 0000 0000 1111</code>。</p>
+<h5 id="2位有效位">2位有效位</h5>
+<p>同样的，2位有效位也是相同的逻辑，上一轮输出可以表示为<code>ab cd ef gh ij kl mn op</code>,此时，包含初始输入数据的最低10比特的位分组即为有效位，即：</p>
+<ul>
+<li><code>d = 11</code></li>
+<li><code>i = 11</code></li>
+<li><code>j = 11</code></li>
+<li><code>o = 11</code></li>
+<li><code>p = 11</code></li>
+</ul>
+<p>现在将<code>00 0d 00 00 ij 00 00 op</code>转化成 <code>00 0d 00 i0 0j 00 o0 0p</code>，同样是插入两个有效位长度的0填充，其计算逻辑为：<br>
+<code>(00 0d 00 00 ij 00 00 op × 00 00 00 00 00 00 02 02) &amp; 10 01 00 10 01 00 10 01 = 00 0d 00 i0 0j 00 o0 0p</code></p>
+<p>最终结果为<code>0000 0011 0000 1100 0011 0000 1100 0011</code>。</p>
+<h5 id="1位有效位">1位有效位</h5>
+<p>最后一轮也是相同的逻辑，就不过多解释了，最终的计算逻辑为：<br>
+<code>(var × 0b0101) &amp; 0100 1001 0010 0100 1001 0010 0100 1001</code></p>
+<p>最终的记过为<code>0000 1001 0010 0100 1001 0010 0100 1001</code>。</p>
+<h4 id="具体代码">具体代码</h4>
+<p>将例子中的二进制转化为十六进制，即可很轻松地得到高效莫顿编码的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">uint32_t</span> <span class="hljs-title">ExpandBits</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> v)</span></span><br><span class="hljs-function"></span>&#123;<br>	v = (v * <span class="hljs-number">0x00010001u</span>) &amp; <span class="hljs-number">0xFF0000FFu</span>;<br>	v = (v * <span class="hljs-number">0x00000101u</span>) &amp; <span class="hljs-number">0x0F00F00Fu</span>;<br>	v = (v * <span class="hljs-number">0x00000011u</span>) &amp; <span class="hljs-number">0xC30C30C3u</span>;<br>	v = (v * <span class="hljs-number">0x00000005u</span>) &amp; <span class="hljs-number">0x49249249u</span>;<br><br>	<span class="hljs-keyword">return</span> v;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">uint32_t</span> <span class="hljs-title">Morton3D_MagicBits</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> x, <span class="hljs-type">uint32_t</span> y, <span class="hljs-type">uint32_t</span> z)</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-keyword">if</span> ((x | y | z) &gt; <span class="hljs-number">1023u</span>)<br>	&#123;<br>		<span class="hljs-built_in">LOG_W</span>(std::format(<span class="hljs-string">&quot;KH_MortonCode::Morton3D_MagicBits: Input (&#123;&#125;, &#123;&#125;, &#123;&#125;) out of 10-bit range [0, 1023].&quot;</span>, x, y, z));<br>		x &amp;= <span class="hljs-number">1023</span>; y &amp;= <span class="hljs-number">1023</span>; z &amp;= <span class="hljs-number">1023</span>;<br>	&#125;<br><br>	<span class="hljs-type">uint32_t</span> bit_x = <span class="hljs-built_in">ExpandBits</span>(x);<br>	<span class="hljs-type">uint32_t</span> bit_y = <span class="hljs-built_in">ExpandBits</span>(y);<br>	<span class="hljs-type">uint32_t</span> bit_z = <span class="hljs-built_in">ExpandBits</span>(z);<br><br>	<span class="hljs-keyword">return</span> (bit_x &lt;&lt; <span class="hljs-number">2</span>) | (bit_y &lt;&lt; <span class="hljs-number">1</span>) | bit_z;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<p>莫顿码并不仅限于整型数据，浮点数同样可以生成对应的莫顿码。具体而言，我们通常先将浮点数归一化到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span> 的范围，再将其映射到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1023</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1023]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1023</span><span class="mclose">]</span></span></span></span> 的整数空间。虽然这一过程会带来一定的精度损失，但莫顿码的主要作用是确定空间数据的索引顺序，因此这种精度损失在实际应用中影响并不显著。</p>
+<h3 id="曲线可视化">曲线可视化</h3>
+<p>最后附上一张莫顿码的曲线可视化，用的是我自己写的渲染器~</p>
+<img src="/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/IMG-20260310172612713.png" srcset="/img/loading.gif" lazyload class="">
+<h3 id="参考文献">参考文献</h3>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/707010073">【Unity Graphics】莫顿码（Morton Code） - 知乎</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/" class="category-chain-item">高性能计算</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/%E8%8E%AB%E9%A1%BF%E7%A0%81/" class="category-chain-item">莫顿码</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/" class="print-no-link">#高性能计算</a>
+      
+        <a href="/tags/%E8%8E%AB%E9%A1%BF%E7%A0%81/" class="print-no-link">#莫顿码</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>高性能计算：莫顿码</div>
+      <div>https://onikatahoshio.github.io/2026/03/10/GPU高性能计算/02-莫顿码/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OnikataHoshio</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年3月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/03/09/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/%E6%8E%92%E5%BA%8F/01-GPU%E5%9F%BA%E6%95%B0%E6%8E%92%E5%BA%8F/" title="高性能计算：GPU上的基数排序">
+                        <span class="hidden-mobile">高性能计算：GPU上的基数排序</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
