@@ -229,6 +229,162 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/03-GPU%E6%9E%84%E5%BB%BABVH-1/" target="_self">
+          <img src="/img/GPU-BVH-1.png" srcset="/img/loading.gif" lazyload alt="高性能计算：莫顿码">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/03-GPU%E6%9E%84%E5%BB%BABVH-1/" target="_self">
+          高性能计算：莫顿码
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/03-GPU%E6%9E%84%E5%BB%BABVH-1/" target="_self">
+        <div>
+          前两篇文章分别介绍了 GPU 基数排序和莫顿码。随着这些前期准备工作的完成，我们终于可以进入正题——在 GPU 上构建 BVH。 在学术界，关于 GPU 构建 BVH 的研究成果十分丰富。论文1 Fast BVH Construction on GPUs 首次将莫顿码应用于 GPU 构建 BVH，并提出了 LBVH 与 SPH BVH 的构建方法。其中，LBVH 的构建过程需要在显存中执行多个步骤
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-03-20 20:00" pubdate>
+              2026-03-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/" class="category-chain-item">高性能计算</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/" class="category-chain-item">BVH</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/">#高性能计算</a>
+            
+              <a href="/tags/GPU/">#GPU</a>
+            
+              <a href="/tags/BVH/">#BVH</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH-2/" target="_self">
+          <img src="/img/GPU-BVH-2.png" srcset="/img/loading.gif" lazyload alt="高性能计算：莫顿码">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH-2/" target="_self">
+          高性能计算：莫顿码
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH-2/" target="_self">
+        <div>
+          前文介绍了当前最高效的 GPU BVH 构建算法（LBVH）。这些方法通过对整个数组进行莫顿码预排序，从而避免了在 BVH 构建过程中对局部数据进行额外排序。此外，它们均采用了基数树的数据结构，并充分利用其特性，形成了极为高效的构建流程。 然而，尽管 LBVH 在构建速度上表现突出，却难以直接应用于高效的光线追踪场景。原因在于，LBVH 的设计仅以构建速度为唯一评价指标，而忽略了另一个关键因素——
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-03-20 20:00" pubdate>
+              2026-03-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/" class="category-chain-item">高性能计算</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/" class="category-chain-item">BVH</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/">#高性能计算</a>
+            
+              <a href="/tags/GPU/">#GPU</a>
+            
+              <a href="/tags/BVH/">#BVH</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/" target="_self">
           <img src="/img/GPU-MortonCode.png" srcset="/img/loading.gif" lazyload alt="高性能计算：莫顿码">
         </a>
@@ -292,6 +448,8 @@
             <i class="iconfont icon-tags"></i>
             
               <a href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/">#高性能计算</a>
+            
+              <a href="/tags/GPU/">#GPU</a>
             
               <a href="/tags/%E8%8E%AB%E9%A1%BF%E7%A0%81/">#莫顿码</a>
             
