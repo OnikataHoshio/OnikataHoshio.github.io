@@ -21,14 +21,14 @@
   
     <meta name="description" content="前文介绍了当前最高效的 GPU BVH 构建算法（LBVH）。这些方法通过对整个数组进行莫顿码预排序，从而避免了在 BVH 构建过程中对局部数据进行额外排序。此外，它们均采用了基数树的数据结构，并充分利用其特性，形成了极为高效的构建流程。 然而，尽管 LBVH 在构建速度上表现突出，却难以直接应用于高效的光线追踪场景。原因在于，LBVH 的设计仅以构建速度为唯一评价指标，而忽略了另一个关键因素——">
 <meta property="og:type" content="article">
-<meta property="og:title" content="高性能计算：莫顿码">
-<meta property="og:url" content="https://onikatahoshio.github.io/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH-2/index.html">
+<meta property="og:title" content="高性能计算：GPU-BVH (2)">
+<meta property="og:url" content="https://onikatahoshio.github.io/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/index.html">
 <meta property="og:site_name" content="星生的小窝">
 <meta property="og:description" content="前文介绍了当前最高效的 GPU BVH 构建算法（LBVH）。这些方法通过对整个数组进行莫顿码预排序，从而避免了在 BVH 构建过程中对局部数据进行额外排序。此外，它们均采用了基数树的数据结构，并充分利用其特性，形成了极为高效的构建流程。 然而，尽管 LBVH 在构建速度上表现突出，却难以直接应用于高效的光线追踪场景。原因在于，LBVH 的设计仅以构建速度为唯一评价指标，而忽略了另一个关键因素——">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/GPU-BVH-2.png">
-<meta property="article:published_time" content="2026-03-20T12:00:00.000Z">
-<meta property="article:modified_time" content="2026-03-20T13:31:27.927Z">
+<meta property="article:published_time" content="2026-03-20T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-20T13:43:38.788Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="BVH">
 <meta property="article:tag" content="GPU">
@@ -38,7 +38,7 @@
   
   
   
-  <title>高性能计算：莫顿码 - 星生的小窝</title>
+  <title>高性能计算：GPU-BVH (2) - 星生的小窝</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -210,7 +210,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="高性能计算：莫顿码"></span>
+            <span id="subtitle" data-typed-text="高性能计算：GPU-BVH (2)"></span>
           
         </div>
 
@@ -221,7 +221,7 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-03-20 20:00" pubdate>
+        <time datetime="2026-03-20 21:00" pubdate>
           2026年3月20日 晚上
         </time>
       </span>
@@ -244,7 +244,7 @@
         
         
         
-          35 分钟
+          34 分钟
         
       </span>
     
@@ -281,7 +281,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">高性能计算：莫顿码</h1>
+            <h1 id="seo-header">高性能计算：GPU-BVH (2)</h1>
             
             
               <div class="markdown-body">
@@ -301,7 +301,7 @@
 <p>在前一篇文章的最后部分，我们介绍了 GPU 上自底向上构建 BVH 的方法。事实上，相较于自顶向下（划分式）的构建方式，GPU 算法更倾向于采用自底向上的策略。</p>
 <p>谈到自底向上，就不得不引入 <strong>聚类（cluster）</strong> 的概念来辅助理解。对机器学习有所了解的同学对“聚类”一词一定不会陌生，它指的是由具有相似特征的元素组成的集合。在 BVH 的自底向上构建过程中，所有叶子节点首先各自形成一个仅包含自身的聚类。随后，每个聚类会寻找其最近邻聚类；若两个聚类互为最近邻，则合并为一个父节点。按照这一逻辑不断迭代，直到只剩下一个聚类，我们便完成了自底向上的 BVH 构建。</p>
 <p>然而，若要为每个聚类寻找其全局最近邻节点，计算量将十分庞大。假设存在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个聚类，则该过程的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。为降低最近邻搜索的开销，作者引入了一个搜索半径 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span>：每个聚类仅在该半径范围内寻找最近邻。若两个聚类互为最近邻，则合并为父节点。通过这一策略，计算复杂度得以显著降低。</p>
-<p>{% asset_img IMG-20260312200629066.png}</p>
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260312200629066.png" srcset="/img/loading.gif" lazyload class="">
 <p>图例直观地展示了这一过程。在每次迭代中，绿色节点会找到与其互为最近邻的节点，并合并为父节点，作为下一轮迭代的输入；而红色节点若未能找到互为最近邻的对象，则直接复制到下一轮输入中。由此可见，迭代的过程本质上就是 BVH 的构建过程。</p>
 <p>为避免confusion，后文中的“聚类”可直接理解为 BVH 的节点，两者不再做区分。</p>
 <h4 id="前期准备工作">前期准备工作</h4>
@@ -329,7 +329,7 @@
 实际上，这里所需的 CUDA Kernel 不止三个。尤其在处理大规模数据时，任务 3 至少需要三个 Kernel 才能完成。详细请查阅之前有关基数排序的文章。</p>
 </blockquote>
 <p>在 GPU 上完成任务 1 和任务 2 相对容易，但<strong>任务 3</strong> 的实现却更具挑战性。为更好地解释任务 3 的逻辑，我们可以引入一个<strong>辅助缓冲区</strong>（尽管实际实现中并非必需）。具体而言，当任务 2 的输出缓冲区中某个元素<strong>有效</strong>时，将其在辅助缓冲区中标记为 <strong>1</strong>；若<strong>无效</strong>，则标记为 <strong>0</strong>。随后，对该辅助缓冲区执行一次 GPU 前缀和扫描，其结果即为压缩后节点在输出缓冲区中的位置索引。</p>
-<p>{% asset_img IMG-20260312212011543.png}</p>
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260312212011543.png" srcset="/img/loading.gif" lazyload class="">
 <p>当迭代的输出仅剩一个节点时，迭代过程即告结束，PLOC 算法完成。</p>
 <h3 id="Parallel-locally-ordered-clustering-PLOC-2">Parallel locally-ordered clustering++ (PLOC++)</h3>
 <p>从理论上看，PLOC 算法已经相当完备，但在具体的工程实现中仍存在优化空间。在 PLOC 的原始论文中，每轮迭代都需要依次调用三个独立的 CUDA Kernel（或 OpenGL Compute Shader）。随着迭代次数的增加，Kernel 之间的同步开销会不断累积，最终形成性能瓶颈。此外，PLOC 的邻域搜索策略也显得冗余。为此，PLOC++ 提出只需查询一个节点的半邻域，即可获得完整的最近邻信息，从而在计算量上实现近一倍的性能提升。</p>
@@ -346,7 +346,7 @@
 <p>那么，PLOC++ 究竟是如何实现将三个 CUDA Kernel 合并的呢？答案在于 <strong>分块（chunk）处理</strong>。</p>
 <p>熟悉计算着色器的同学一定了解“工作组”的概念。PLOC++ 的优化实际上就是将数据分块处理（这里的数据就是BVH的节点，也就是前文一直提及的聚类），每个工作组负责处理各自的局部节点块。这样一来，所有中间数据都可以存储在共享内存中，从而显著提升数据访问效率。</p>
 <p>为了保证能够在局部数据范围内计算出与 PLOC 中任务 1 和任务 2 完全一致的结果，每个工作组需要在其负责的节点块前后进行 Padding。具体而言，若最近邻搜索半径为 R，则除了本地节点块外，还需在前端额外填充前一个节点块的末尾 2R 个节点，在后端填充后一个节点块的起始 2R 个节点。</p>
-<p>{% asset_img IMG-20260312220156052.png}</p>
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260312220156052.png" srcset="/img/loading.gif" lazyload class="">
 <p>那么，为什么在首位需要 Padding 2R 个节点，而不是 R 个节点呢？这其中是有原因的。</p>
 <p>回忆 PLOC 的任务 2：当找到一对互为节点最近邻的节点时，合并结果会写入索引较小的节点位置，即由前一个线程完成，而后一个线程则直接跳过。如果本地块首位仅 Padding R 个节点（图示中的黄色区域），则落在该区域的节点 B 可能会与本地节点块中的节点 A 形成最近邻对。在这种情况下，我们需要将 A 对应的辅助数组标记为 <strong>无效（Invalid）</strong>，而 B 与 A 的合并逻辑则由前一个工作组完成。</p>
 <p>然而，实际情况可能是节点 B 与节点 C 才是最近邻对，而它们的合并完全由前一个工作组负责。为了确保能够正确计算出最相邻的节点信息，我们必须在首位 Padding 2R 个节点。</p>
@@ -360,7 +360,7 @@
 <p>那么，H-PLOC 究竟是如何再次显著提升 BVH 的构建速度（达到 1.6–13 倍），并使其性能仅次于 LBVH 呢？答案在于 <strong>结合了 PLOC++ 与 LBVH 的构建过程</strong>。</p>
 <p>早期的混合式 BVH 构建方法通常是根据输入规模选择不同的构建策略，例如小规模数据使用高质量构建，大规模数据使用高效构建。而 H-PLOC 的独特之处在于，它并非简单地在不同场景下切换算法，而是 <strong>在同一构建流程中充分融合了 LBVH 的高效性与 PLOC++ 的高质量性</strong>。</p>
 <p>HPLOC给出一个非常清晰的示意图，这对我们理解HPLOC算法有很大的帮助。</p>
-<p>{% asset_img IMG-20260313111232982.png}</p>
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260313111232982.png" srcset="/img/loading.gif" lazyload class="">
 <p>如图所示，H-PLOC 利用 LBVH 的基数树层次结构来指导 PLOC++ 的合并过程。在构建流程中，首先生成一个 LBVH，并设置一个 <strong>合并阈值</strong>。随后为所有叶子节点分配线程，并依次向上遍历。当某一区间的节点数量超过合并阈值时，便触发 PLOC++ 的合并操作，直到该区间内的节点数不大于阈值为止。</p>
 <p>在图示 (b) 中，各线程向上遍历两层，抵达内部节点 1 和 6。此时，节点 1 对应区间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,3]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">3</span><span class="mclose">]</span></span></span></span> 含有 4 个节点，节点 6 对应区间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>5</mn><mo separator="true">,</mo><mn>6</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[5,6]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mclose">]</span></span></span></span> 含有 3 个节点，均超过合并阈值 2，因此执行 PLOC++ 的合并过程。合并得到的新节点 A、B、C 将作为最终 BVH 的一部分。通过迭代重复上述步骤，直至整个 BVH 构建完成。</p>
 <blockquote>
@@ -370,8 +370,8 @@
 </blockquote>
 <p>至此，我们对 H-PLOC 的 BVH 构建流程已有了较为清晰的认识，是时候深入算法的实现细节了。实际上，我们并不需要预先生成完整的 LBVH，而是在 LBVH 的生成过程中就融入 PLOC++ 的合并步骤。换言之，借助一些工程上的技巧，H-PLOC 能够在<strong>一次</strong>自底向上的构建过程中同时完成 LBVH 的生成与 PLOC++ 的合并，从而显著提升效率。</p>
 <p>论文给出了详细的伪代码：</p>
-<p>{% asset_img IMG-20260313132316572.png}</p>
-<p>{% asset_img IMG-20260313132344298.png}</p>
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260313132316572.png" srcset="/img/loading.gif" lazyload class="">
+<img src="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/04-GPU%E6%9E%84%E5%BB%BABVH/IMG-20260313132344298.png" srcset="/img/loading.gif" lazyload class="">
 <p>在算法 1 的第 9–26 行中，所实现的正是前文介绍的自底向上构建 BVH 的过程。不同之处在于，这里需要额外存储区间的字节节点划分位置。换言之，LBVH 的父节点不仅要计算自身的有效区间范围，还需额外记录一个划分位置（这里个人感觉有点Confusion，因为 LBVH 节点的索引本身就与区间划分密切相关）。</p>
 <p>在完成一层 LBVH 的构建后，需要检查该层节点的区间大小是否超过合并阈值；若超过，则触发 PLOC++ 的合并过程。这部分实现细节在算法 2 中有更为完整的展示。</p>
 <p>然而，尽管算法 2 给出了整体执行步骤，其中仍存在一些令人困惑的地方。例如：为什么要分别统计左区间与右区间的节点数量，而不是直接统计整个区间？统计函数是否经过优化？数据存储是否依旧与 PLOC++ 相同，即每层节点压缩后存放在缓冲区中？这些问题若要彻底解答，可能需要查阅源码或尝试自己实现一遍了。这也是只读论文的弊端了~</p>
@@ -438,8 +438,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>高性能计算：莫顿码</div>
-      <div>https://onikatahoshio.github.io/2026/03/20/GPU高性能计算/BVH/04-GPU构建BVH-2/</div>
+      <div>高性能计算：GPU-BVH (2)</div>
+      <div>https://onikatahoshio.github.io/2026/03/20/GPU高性能计算/BVH/04-GPU构建BVH/</div>
     </div>
     <div class="license-meta">
       
@@ -483,18 +483,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/03-GPU%E6%9E%84%E5%BB%BABVH-1/" title="高性能计算：莫顿码">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">高性能计算：莫顿码</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/03/10/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/02-%E8%8E%AB%E9%A1%BF%E7%A0%81/" title="高性能计算：莫顿码">
-                        <span class="hidden-mobile">高性能计算：莫顿码</span>
+                      <a href="/2026/03/20/GPU%E9%AB%98%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97/BVH/03-GPU%E6%9E%84%E5%BB%BABVH/" title="高性能计算：GPU-BVH (1)">
+                        <span class="hidden-mobile">高性能计算：GPU-BVH (1)</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
