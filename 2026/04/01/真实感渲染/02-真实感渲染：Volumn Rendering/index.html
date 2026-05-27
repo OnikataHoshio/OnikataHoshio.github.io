@@ -19,16 +19,16 @@
   <meta name="author" content="OnikataHoshio">
   <meta name="keywords" content="">
   
-    <meta name="description" content="体积渲染（Volumn Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种参与介质，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如吸收、散射，甚至发光。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。 描述这一过程的核">
+    <meta name="description" content="体积渲染（Volume Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种参与介质，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如吸收、散射，甚至发光。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。 描述这一过程的核">
 <meta property="og:type" content="article">
-<meta property="og:title" content="真实感渲染：Volumn Rendering">
+<meta property="og:title" content="真实感渲染：Volume Rendering">
 <meta property="og:url" content="https://onikatahoshio.github.io/2026/04/01/%E7%9C%9F%E5%AE%9E%E6%84%9F%E6%B8%B2%E6%9F%93/02-%E7%9C%9F%E5%AE%9E%E6%84%9F%E6%B8%B2%E6%9F%93%EF%BC%9AVolumn%20Rendering/index.html">
 <meta property="og:site_name" content="星生的小窝">
-<meta property="og:description" content="体积渲染（Volumn Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种参与介质，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如吸收、散射，甚至发光。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。 描述这一过程的核">
+<meta property="og:description" content="体积渲染（Volume Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种参与介质，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如吸收、散射，甚至发光。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。 描述这一过程的核">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://onikatahoshio.github.io/img/Volumn%20Rendering.png">
 <meta property="article:published_time" content="2026-04-01T09:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-03T06:25:10.145Z">
+<meta property="article:modified_time" content="2026-05-27T10:48:44.850Z">
 <meta property="article:author" content="OnikataHoshio">
 <meta property="article:tag" content="PBR">
 <meta property="article:tag" content="体积渲染">
@@ -38,7 +38,7 @@
   
   
   
-  <title>真实感渲染：Volumn Rendering - 星生的小窝</title>
+  <title>真实感渲染：Volume Rendering - 星生的小窝</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -210,7 +210,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="真实感渲染：Volumn Rendering"></span>
+            <span id="subtitle" data-typed-text="真实感渲染：Volume Rendering"></span>
           
         </div>
 
@@ -281,12 +281,12 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">真实感渲染：Volumn Rendering</h1>
+            <h1 id="seo-header">真实感渲染：Volume Rendering</h1>
             
             
               <div class="markdown-body">
                 
-                <p>体积渲染（Volumn Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种<strong>参与介质</strong>，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如<strong>吸收、散射，甚至发光</strong>。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。</p>
+                <p>体积渲染（Volume Rendering），图形学渲染领域的又一座大山。在 NeRF 和 3DGS 还没有出现之前，体积渲染主要被用来处理各种<strong>参与介质</strong>，比如牛奶、火焰、云层这类“看得见内部结构”的东西。这些介质有一个共同点：它们内部都充满了大量微小粒子，光在其中传播时，会不断和这些粒子发生相互作用，比如<strong>吸收、散射，甚至发光</strong>。也正因为如此，参与介质的渲染要比普通表面渲染复杂得多。</p>
 <p>描述这一过程的核心工具，就是看起来特吓人的<strong>辐射传输方程</strong>（<strong>Radiative Transfer Equation, RTE</strong>）。和常见的渲染方程相比，它要复杂不少，因为它本质上是一个积分—微分方程。而渲染方程则是一个积分方程。</p>
 <p>不过虽然辐射传输方程看起来很复杂，但在实际计算时，我们通常可以借助一种非常经典的方法——<strong>光线步进（Ray Marching）</strong>——来一步一步地近似求解它。</p>
 <p>这篇文章主要是关于体积渲染背后的理论部分，不会涉及具体的实现。</p>
@@ -546,7 +546,7 @@ L(\mathbf x,\boldsymbol \omega)
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>真实感渲染：Volumn Rendering</div>
+      <div>真实感渲染：Volume Rendering</div>
       <div>https://onikatahoshio.github.io/2026/04/01/真实感渲染/02-真实感渲染：Volumn Rendering/</div>
     </div>
     <div class="license-meta">
